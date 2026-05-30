@@ -1,5 +1,5 @@
 # ============================================================
-# Starfield Image Gallery — Modal Image Viewer
+# starfield_intelligent_gallery — Modal Image Viewer
 # Author: Mark J. Latsha
 # Location: Brentwood, CA 94513
 # Email: Latsha2031@gmail.com

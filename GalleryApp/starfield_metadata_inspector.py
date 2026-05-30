@@ -1,5 +1,5 @@
 # ============================================================
-# Starfield Image Gallery — Metadata Inspector 2.0
+# starfield_intelligent_gallery — Metadata Inspector 2.0
 # Author: Mark J. Latsha
 # Location: Brentwood, CA 94513
 #

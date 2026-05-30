@@ -1,5 +1,5 @@
 # ============================================================
-# Starfield Image Gallery — Hotkey Overlay
+# starfield_intelligent_gallery — Hotkey Overlay
 # Author: Mark J. Latsha
 # Location: Brentwood, CA 94513
 # Email: Latsha2031@gmail.com

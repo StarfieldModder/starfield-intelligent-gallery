@@ -1,5 +1,5 @@
 # Logos Folder
-# Project  : Starfield Image Gallery
+# Project  : starfield_intelligent_gallery
 # Author   : Mark Latsha
 # Purpose  : Stores all logo and branding image files used
 #            by the application.

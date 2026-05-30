@@ -1,5 +1,5 @@
 # ════════════════════════════════════════════════════════════
-#   STARFIELD IMAGE GALLERY — v0.9.0 (Pre-release / Beta)
+#   starfield_intelligent_gallery — v0.9.0 (Pre-release / Beta)
 #
 #   Author: Mark J. Latsha
 #   Co-Author: Copilot (Microsoft)
@@ -10,7 +10,7 @@
 #   Copyright © 2026
 #
 #   Description:
-#       The Starfield Image Gallery is a modular, offline-first
+#       The starfield_intelligent_gallery is a modular, offline-first
 #       desktop application designed to organize, view, filter,
 #       and analyze Starfield screenshots with metadata support,
 #       dynamic filtering, modal viewing, slideshow playback,
@@ -36,7 +36,7 @@
 # ════════════════════════════════════════════════════════════
 
 # =============================================================================
-#  starfield_gallery.py  —  Starfield Image Gallery  —  Master Launcher
+#  starfield_gallery.py  —  starfield_intelligent_gallery  —  Master Launcher
 #  v0.9.0 (Pre-release / Beta)
 # =============================================================================
 #
@@ -85,7 +85,7 @@ except ImportError:
 
 # ---------- Constants ----------
 
-APP_TITLE = "Starfield Image Gallery"
+APP_TITLE = "starfield_intelligent_gallery"
 APP_VERSION = "1.0 Full Dream Build"
 
 SUPPORTED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tga", ".webp"}

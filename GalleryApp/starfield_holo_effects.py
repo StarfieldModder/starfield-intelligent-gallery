@@ -17,7 +17,7 @@
 
 # ============================================================
 # starfield_holo_effects.py  — COMPLETE v0.9.0
-# STARFIELD IMAGE GALLERY — Phase 4 | Holo-Panel Visual Effects
+# starfield_intelligent_gallery — Phase 4 | Holo-Panel Visual Effects
 # Pulsing glow borders, scanlines, corner brackets, hover glow.
 # Developed: May 2026 | Mark — Brentwood, CA
 # ============================================================

@@ -1,4 +1,4 @@
-# 🌌 Starfield Image Gallery — v0.9.0 (Pre-release / Beta)
+# 🌌 starfield_intelligent_gallery — v0.9.0 (Pre-release / Beta)
 
 A modular, offline-first desktop application for browsing, filtering, analyzing, and enjoying **Starfield** screenshots with metadata support, dynamic filtering, modal viewing, slideshow playback, batch operations, and favorites management.
 

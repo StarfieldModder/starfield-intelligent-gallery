@@ -17,7 +17,7 @@
 
 # ============================================================
 # starfield_favorites.py  — COMPLETE v0.9.0
-# STARFIELD IMAGE GALLERY — Phase 4 | Persistent Favorites Engine
+# starfield_intelligent_gallery — Phase 4 | Persistent Favorites Engine
 # Star ratings, favorites.json, quick-filter, grid overlay.
 # Developed: May 2026 | Mark — Brentwood, CA
 # ============================================================

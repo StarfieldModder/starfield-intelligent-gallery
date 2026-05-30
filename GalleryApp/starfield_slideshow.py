@@ -11,13 +11,13 @@
 #
 #   Description:
 #       Provides slideshow playback functionality for the
-#       Starfield Image Gallery. Supports timed transitions,
+#       starfield_intelligent_gallery. Supports timed transitions,
 #       keyboard navigation, and modal integration.
 # ════════════════════════════════════════════════════════════
 #
 # ═════════════════════════════════════════════════════# ============================================================
 # starfield_slideshow.py - V 0.9.0
-# STARFIELD IMAGE GALLERY — Phase 4 | Cinematic Slideshow Engine
+# starfield_intelligent_gallery — Phase 4 | Cinematic Slideshow Engine
 # Full-screen fade/dissolve slideshow with Starfield aesthetic.
 # Developed: May 2026 | Mark — Brentwood, CA
 # ============================================================

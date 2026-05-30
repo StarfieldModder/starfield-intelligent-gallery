@@ -17,7 +17,7 @@
 # 
 # # =====================================================
 # starfield_batch_ops.py  — COMPLETE v0.9.0
-# STARFIELD IMAGE GALLERY — Phase 4 | Batch Operations Panel
+# starfield_intelligent_gallery — Phase 4 | Batch Operations Panel
 # Multi-select, batch tag, rename, export, favorite.
 # Developed: May 2026 | Mark — Brentwood, CA
 # ============================================================

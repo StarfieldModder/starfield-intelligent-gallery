@@ -1,5 +1,5 @@
 # ============================================================
-# Starfield Image Gallery — Filter Bar UI
+# starfield_intelligent_gallery — Filter Bar UI
 # Author: Mark J. Latsha
 # Location: Brentwood, CA 94513
 # Email: Latsha2031@gmail.com

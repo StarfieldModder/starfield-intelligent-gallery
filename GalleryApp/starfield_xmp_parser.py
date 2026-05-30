@@ -33,7 +33,7 @@
 #       filtering, display, and analysis within the gallery.
 # ════════════════════════════════════════════════════════════
 
-# STARFIELD IMAGE GALLERY — Phase 4 | XMP Metadata Parser
+# starfield_intelligent_gallery — Phase 4 | XMP Metadata Parser
 # Reads Starfield's embedded PNG/XMP metadata natively.
 # Falls back through EXIF → filename → empty dict gracefully.
 # Developed: May 2026 | Mark — Brentwood, CA

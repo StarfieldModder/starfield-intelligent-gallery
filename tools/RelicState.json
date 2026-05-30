@@ -1,0 +1,56 @@
+**Components**
+- **Ingestion** (`src/gallery_core/ingestion.py`): scans directories, normalizes filenames, and queues files for processing.
+- **MetadataExtractor** (`src/metadata_extractor.py`): reads EXIF/XMP and basic file info.
+- **Artifact Engine** (`src/gallery_core/artifacts.py`): creates Seeds and applies transformation templates.
+- **RelicState** (`src/relic_state.py`): persistent NG+ relic state and unlocked layers.
+- **TagManager** (`src/tag_manager.py`): lightweight tag store for UI and filters.
+- **PhotoDatabase** (`src/database.py`): SQLite wrapper for photo records and metadata.
+- **UI** (`src/ui/`): PyQt panels and modal viewers (DeepArchivePanel, etc.).
+- **Tools** (`tools/`): normalization scripts, repo audit, and developer utilities.
+
+---
+
+## Data flow and lifecycle
+
+1. **Discovery**: `file_scanner` finds screenshots in configured directories.
+2. **Extraction**: `MetadataExtractor` reads resolution, EXIF, and sidecar XMP.
+3. **Seed creation**: Artifact Engine creates a Seed object with provenance and markers.
+4. **Verification**: Automated checks (schema, checksum, provenance) run.
+5. **Promotion**: Seeds that pass checks (and optional human review) are promoted to Relics.
+6. **Archival**: Curated Relics are moved to Archive and become immutable.
+
+---
+
+## Relic and Artifact Gating Rules (canonical)
+
+**Principles**
+- Rules are **config-driven** and versioned.
+- Enforcement is server/local‑process side (no client trust).
+- Privacy first: private markers require explicit consent to promote.
+
+**Definitions**
+- **Seed**: initial artifact derived from raw session data; editable.
+- **Relic**: verified, immutable artifact with full provenance.
+- **Archive**: curated collection of Relics for long-term storage.
+
+**Gating conditions**
+- **Provenance**: `session_id`, `timestamp`, `file_hash`, and `marker_ids` required.
+- **Schema**: artifact must validate against the artifact JSON schema.
+- **Verification**: checksum match and optional human review flag.
+- **Privacy**: `private: true` prevents promotion without explicit consent.
+- **Retention**: Relics are immutable; Seeds can be edited until promotion.
+
+**Promotion workflow**
+- Seed → automated checks (schema, provenance, checksum) → optional human review → Relic.
+- Promotion emits an immutable transaction log entry.
+
+**Promotion example (pseudocode)**
+```text
+if validate_schema(seed) and verify_provenance(seed) and not seed.private:
+    if config.require_human_review:
+        queue_for_review(seed)
+    else:
+        promote_to_relic(seed)
+else:
+    mark_seed_failed(seed, reason)
+
