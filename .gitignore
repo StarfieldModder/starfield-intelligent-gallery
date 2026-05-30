@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# VS Code
+.vscode/
+
+# Large assets (if you want to track them separately)
+assets/
