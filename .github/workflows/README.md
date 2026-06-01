@@ -1,0 +1,1 @@
+A new GitHub Actions workflow now validates the SIG launcher script in `-DryRun` mode to ensure correctness on every commit.

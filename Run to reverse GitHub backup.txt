@@ -1,0 +1,5 @@
+Run to reverse GitHub backup::
+# remove the current SIG folder (only if you want to fully restore)
+Remove-Item -LiteralPath C:\SIG -Recurse -Force
+# restore from backup (replace timestamp with the actual folder name)
+Copy-Item -Path "C:\SIG_backup_YYYYMMDD_HHMMSS" -Destination C:\SIG -Recurse -Force
