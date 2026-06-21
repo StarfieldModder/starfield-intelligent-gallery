@@ -1,3 +1,5 @@
 @echo off
-cd /d C:\Projects\starfield-intelligent-gallery
-python main.py
+pushd C:\SIG
+python -m ui.main_window
+pause
+
