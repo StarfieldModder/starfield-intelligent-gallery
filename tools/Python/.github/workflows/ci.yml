@@ -1,0 +1,17 @@
+
+---
+
+### 3) `docs/relics-and-artifacts.md`  
+**Place:** `docs/relics-and-artifacts.md`  
+
+```markdown
+# ================================================================
+File: docs/relics-and-artifacts.md
+Location: docs/
+Author: Mark J. Latsha
+Co-Author: Microsoft Copilot
+Created: 2026-05-27
+Description:
+  Canonical documentation for Relics & Artifacts: definitions,
+  gating rules, promotion workflow, privacy, and data model.
+===============================================================

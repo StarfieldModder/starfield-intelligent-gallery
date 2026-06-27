@@ -1,0 +1,6 @@
+Run the loader without activating PowerShell scripts  
+From C:\SIG\Python run:
+
+powershell
+.venv\Scripts\python.exe sig\script_player.py
+The loader will print each shot, show monologue lines, and sleep for the shot durations so you can feel pacing.

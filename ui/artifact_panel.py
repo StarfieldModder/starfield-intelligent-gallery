@@ -18,14 +18,19 @@
 #       - Only the starfield shimmer is active.
 # ================================================================
 
-from PyQt6.QtCore import Qt, QTimer, QUrl
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import (
-    QWidget, QGraphicsScene, QGraphicsView,
-    QGraphicsPixmapItem, QVBoxLayout
+from PySide6.QtWidgets import (
+    QMainWindow, QWidget, QVBoxLayout, QLabel, QPushButton
 )
+from PySide6.QtCore import Qt, QTimer, QUrl
 import os
 import math
+
+from PySide6.QtWidgets import QGraphicsView
+
+from PySide6.QtWidgets import QGraphicsPixmapItem
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QGraphicsScene
+
 
 
 # ------------------------------------------------------------

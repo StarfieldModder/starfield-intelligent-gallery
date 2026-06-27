@@ -1,0 +1,3 @@
+PS C:\SIG> git remote -v
+origin  https://github.com/StarfieldModder/starfield-intelligent-gallery.git (fetch)
+origin  https://github.com/StarfieldModder/starfield-intelligent-gallery.git (push)

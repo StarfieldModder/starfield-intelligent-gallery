@@ -1,0 +1,11 @@
+﻿Starfield Intelligent Gallery
+Migration marker
+------------------
+Repository moved to GitHub and initial import completed.
+
+Timestamp: 2026-05-30_16-21-20
+Commit: chore: initial import — director notes and script; merged remote
+Notes:
+- Python folder converted from embedded repo to top-level folder.
+- All local files committed and pushed to origin/main and origin/dev.
+- See README.md for usage notes and capture sources.

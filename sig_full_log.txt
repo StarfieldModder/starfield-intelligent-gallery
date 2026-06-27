@@ -1,0 +1,25 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260626034711
+Username: MARKLATSHA\latsh
+RunAs User: MARKLATSHA\latsh
+Configuration Name: 
+Machine: MARKLATSHA (Microsoft Windows NT 10.0.28120.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 53144
+PSVersion: 5.1.28000.2315
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.28000.2315
+BuildVersion: 10.0.28000.2315
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\SIG\sig_full_log.txt
+PS C:\WINDOWS\system32> Start-Transcript -Path C:\SIG\sig_full_log.txt
+
+**********************
+Windows PowerShell transcript end
+End time: 20260626034835
+**********************

@@ -1,0 +1,29 @@
+# ============================================================
+# File        : pyproject.toml
+# Project     : Starfield Intelligent Gallery (SIG)
+# Author      : Mark J. Latsha
+# Co-Author   : Microsoft Copilot
+# Created     : May 2026
+# Description : Build configuration enabling SIG to install as a
+#               Python package and expose a one-word launcher.
+# ============================================================
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "starfield_intelligent_gallery"
+version = "0.0.1"
+description = "Starfield Intelligent Gallery"
+authors = [{name = "Mark J. Latsha"}]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+sig = "GalleryApp.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["GalleryApp*"]
