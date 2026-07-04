@@ -1,0 +1,7 @@
+{
+    "auto_ingest_enabled": true,
+    "steam_userdata_root": null,
+    "starfield_install_root": null,
+    "sig_storage_root": "C:\\SIG\\Storage",
+    "exporter_script": "C:\\SteamExporter\\steam_game_recording_exporter.py"
+}

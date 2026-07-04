@@ -1,4 +1,4 @@
-"""
+r"""
 Starfield Intelligent Gallery (SIG)
 Application Launcher
 

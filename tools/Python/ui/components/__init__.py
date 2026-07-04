@@ -1,4 +1,4 @@
-"""
+r"""
 UI Components Package for SIG
 
 Contains:
@@ -6,3 +6,4 @@ Contains:
     - sidebar.py
     - viewer.py
 """
+

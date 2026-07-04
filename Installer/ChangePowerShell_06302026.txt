@@ -1,0 +1,1 @@
+# SIG Project — auto-activate virtual environment$sigVenv = "C:\SIG\.venv\Scripts\Activate.ps1"if (Test-Path $sigVenv) {    Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned -Force    & $sigVenv    Write-Host "  (.venv) SIG environment activated" -ForegroundColor Cyan}

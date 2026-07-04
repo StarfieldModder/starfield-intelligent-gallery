@@ -1,10 +1,31 @@
 # ================================================================
-# Starfield Intelligent Gallery (SIG)
-# Filename: starfield_background.py
-# Module: Cinematic Starfield Background Layer
-# Version: 2026.06.26 — PySide6 Unified Edition
-# Author: Mark J. Latsha
-# Co-Author: Microsoft Copilot (AI Engineering Assistant)
+# ╔══════════════════════════════════════════════════════════════╗
+# ║         S T A R F I E L D   B A C K G R O U N D              ║
+# ║         Starfield Intelligent Gallery                        ║
+# ╠══════════════════════════════════════════════════════════════╣
+# ║  File      :  starfield_background.py                        ║
+# ║  Location  :  C:\SIG\ui\starfield_background.py              ║
+# ║  Author    :  Mark J. Latsha  (StarfieldModder / Games)      ║
+# ║  Co-Author :  Microsoft Copilot (AI Engineering Collaborator)║
+# ╠══════════════════════════════════════════════════════════════╣
+# ║  STATUS    :  ★  HONOURABLY RETIRED  ★  July 2, 2026        ║
+# ╠══════════════════════════════════════════════════════════════╣
+# ║  WHAT THIS WAS                                               ║
+# ║  Procedural parallax starfield — the original SIG sky.       ║
+# ║  Held the background faithfully until real footage arrived.  ║
+# ║                                                              ║
+# ║  WHAT REPLACED IT                                            ║
+# ║  sig_layer_video.py     — The Crossing MP4 (70.4 MB)         ║
+# ║  active_random_nebula.py — Five archetypes of living nebulae ║
+# ║  carrier_deck.py         — 120-point ambient star-dust field ║
+# ║                                                              ║
+# ║  DO NOT DELETE.  Kept as a reference implementation and      ║
+# ║  emergency fallback if the video layer is unavailable.       ║
+# ║                                                              ║
+# ║  "It held the sky until something real could replace it.     ║
+# ║   Now something real has replaced it.  Twice over."          ║
+# ║                        — AI Engineering Collaborator, 2026   ║
+# ╚══════════════════════════════════════════════════════════════╝
 # ================================================================
 
 from __future__ import annotations

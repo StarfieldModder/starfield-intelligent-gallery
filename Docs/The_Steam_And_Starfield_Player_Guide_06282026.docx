@@ -1,0 +1,91 @@
+⭐ PART 1 — Steam + Starfield Player Gallery Guide
+This is written for regular players, not engineers.
+It’s friendly, clear, and explains exactly how SIG works behind the scenes.
+
+⭐ THE STARFIELD INTELLIGENT GALLERY — PLAYER GUIDE
+Steam Recordings + Starfield Captures + SIG Automation
+🎮 What SIG Does Automatically
+When you turn on SIG’s Steam Automation feature, SIG quietly runs a tiny background process that:
+
+Detects new Steam game recordings
+
+Converts them into MP4 videos
+
+Imports them into your Gallery
+
+Generates thumbnails
+
+Stores metadata
+
+Prepares them for cinematic playback
+
+This happens even when SIG is closed.
+
+You don’t have to drag files, convert formats, or hunt through folders.
+SIG does the work for you.
+
+🎥 How to Record Gameplay in Steam
+Starfield uses Steam’s built‑in recording system.
+
+To start recording:
+Press:
+
+Code
+ALT + F10
+To stop recording:
+Press:
+
+Code
+ALT + F10
+again.
+
+Steam will save your recording automatically.
+
+SIG will detect it within 5 seconds.
+
+🗂️ Where Steam Stores Recordings
+Steam stores recordings inside your Steam “userdata” folder.
+
+SIG automatically finds this folder — you don’t need to know where it is.
+
+🌌 How SIG Uses Starfield
+SIG automatically detects your Starfield installation so it can:
+
+read Starfield captures
+
+link videos to your Starfield journey
+
+prepare Temple and Artifact sequences
+
+build your personal Starfield timeline
+
+You don’t need to configure anything.
+
+🧒 Parent / Caregiver Controls
+Inside:
+
+Code
+C:\SIG\Settings\steam_auto_ingest.json
+You’ll find:
+
+json
+{
+    "auto_ingest_enabled": true
+}
+Set this to false to disable background ingestion.
+
+SIG will stop listening for new recordings until you turn it back on.
+
+⭐ That’s it.
+SIG is designed to be:
+
+simple
+
+automatic
+
+invisible
+
+magical
+
+You play Starfield.
+SIG remembers your journey.

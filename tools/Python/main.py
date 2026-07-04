@@ -9,7 +9,7 @@
 
 import sys
 from PyQt6.QtWidgets import QApplication
-from sig_launcher import SIGLauncher
+from SIG.sig_launcher import SIGLauncher
 
 def main():
     app = QApplication(sys.argv)

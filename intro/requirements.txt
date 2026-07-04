@@ -1,0 +1,27 @@
+# SIG Intro Engine — Python dependencies
+# Core rendering
+numpy>=1.24.0
+Pillow>=10.0.0
+
+# GUI preview
+PySide6>=6.5.0
+
+# Video export (headless)
+imageio>=2.31.0
+imageio-ffmpeg>=0.4.9
+
+# Audio
+pydub>=0.25.1
+sounddevice>=0.4.6
+soundfile>=0.12.1
+requests>=2.31.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Optional: high-quality SVG rasterisation
+# cairosvg>=2.7.0  # uncomment if libcairo is available
+
+# Optional: GPU acceleration
+# cupy-cuda12x>=12.0.0  # uncomment for CUDA 12 environments

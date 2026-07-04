@@ -1,4 +1,4 @@
-"""
+r"""
 UI Package for Starfield Intelligent Gallery (SIG)
 
 Contains:
@@ -6,3 +6,4 @@ Contains:
     - old_main_window.py  (archived legacy MainWindow)
     - components/         (gallery, sidebar, viewer)
 """
+
