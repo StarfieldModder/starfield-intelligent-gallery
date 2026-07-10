@@ -1,0 +1,436 @@
+r"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║   ███████╗ ██╗  ██████╗      I M P L E M E N T A T I O N _ P L A N . M D   ║
+║   ██╔════╝ ██║ ██╔════╝      SIG Mission Controller — 2-Week Roadmap        ║
+║   ███████╗ ██║ ██║  ███╗                                                    ║
+║   ╚════██║ ██║ ██║   ██║     TempleConsole · PySide6 · SQLite               ║
+║   ███████║ ██║ ╚██████╔╝                                                    ║
+║   ╚══════╝ ╚═╝  ╚═════╝      "Launch in two weeks. Archive in one day."    ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  File       :  IMPLEMENTATION_PLAN.md                                       ║
+║  Location   :  C:\SIG\mission_controller\IMPLEMENTATION_PLAN.md             ║
+║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                    ║
+║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                    ║
+║  Version    :  1.0.0  —  2026.07.07                                          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+"""
+
+# SIG Mission Controller — 2-Week Phased Implementation Plan
+
+> **Start date assumption:** Tuesday 2026-07-07  
+> **Target completion:** Monday 2026-07-20  
+> **Owner:** Games / StarfieldModder  
+> **Environment:** Windows 10 · Python 3.12 · PySide6 · C:\SIG\
+
+---
+
+## At-a-Glance Milestones
+
+| Day | Milestone |
+|-----|-----------|
+| D1  | Environment confirmed, all tests pass on existing code |
+| D3  | CLI ingestion running against real Starfield pictures |
+| D5  | Full SIG integration — MC panel live in TempleConsole |
+| D7  | Week 1 complete — end-to-end prototype working |
+| D10 | ML classification active, near-dedup tuned |
+| D14 | Production-ready: polished UI, docs, sample dataset |
+
+---
+
+## Phase 1 — Foundation (Days 1–3)
+
+**Goal:** Run the existing prototype against your real image archive, confirm
+zero regressions, and get a baseline count.
+
+### Day 1 — Environment Setup & Test Suite
+
+**Tasks:**
+1. Confirm Python 3.12 + PySide6 virtual environment at `C:\SIG\.venv`
+2. Install Mission Controller dependencies:
+   ```bat
+   cd C:\SIG
+   .venv\Scripts\activate
+   pip install -r mission_controller\requirements.txt
+   ```
+3. Run the full test suite:
+   ```bat
+   python -m pytest mission_controller\tests\ -v
+   ```
+   **Expected:** All 30+ tests pass (5 test files, ~35 assertions).
+4. Generate the sample dataset and verify the DB:
+   ```bat
+   python mission_controller\sample_data\generate_sample_dataset.py
+   ```
+5. Inspect `sample_data\sample_mission_controller.db` with DB Browser for SQLite.
+
+**Success criteria:**
+- All tests green ✓
+- Sample DB contains 16 images, all tagged ✓
+- Schema at version 1 (later migrations applied by CLI) ✓
+
+**Assumptions to verify / adjust:**
+- `C:\Users\Games\Pictures\Starfield` exists and contains images
+- Steam app ID 1716740 screenshot path is accessible
+- `.venv` at `C:\SIG\.venv` is the correct virtual environment location
+
+---
+
+### Day 2 — CLI Dry Run Against Real Archive
+
+**Tasks:**
+1. Dry-run discovery against the real Starfield folder:
+   ```bat
+   python -m mission_controller.ingestion.run_ingest --dry-run -v
+   ```
+   Confirm all sources are discovered: Steam, Xbox, NVIDIA, and primary folder.
+2. If any paths are missing, add them:
+   ```bat
+   python -m mission_controller.ingestion.run_ingest --dry-run --path "D:\Starfield" -v
+   ```
+3. Review the source list in terminal output and note any unexpected paths.
+
+**Success criteria:**
+- At least 1 source discovered (primary folder minimum) ✓
+- No Python errors or import failures ✓
+
+---
+
+### Day 3 — First Real Ingestion
+
+**Tasks:**
+1. Run the full ingestion (no ML yet — fast):
+   ```bat
+   python -m mission_controller.ingestion.run_ingest -v
+   ```
+2. Note the ingestion report:
+   - New images count
+   - Exact duplicate count
+   - Near-duplicate count
+   - Elapsed time
+3. Apply all schema migrations:
+   ```bat
+   python -c "
+   from mission_controller.database import get_db, MigrationEngine
+   db = get_db()
+   MigrationEngine(db).run()
+   print('Done — schema at', MigrationEngine(db).status())
+   "
+   ```
+4. Open DB in DB Browser for SQLite — browse the `images` table.
+5. Adjust `PHASH_THRESHOLD` in `ingestion/dedup.py` if near-dupe count seems off
+   (lower = stricter, higher = more aggressive near-dedup grouping).
+
+**Success criteria:**
+- Ingestion completes without errors ✓
+- `images` table populated with real records ✓
+- Schema at version 4 ✓
+- Near-dupe ratio makes sense for your archive ✓
+
+**Deliverable:** Baseline count of your Starfield archive (new vs. duplicates).
+
+---
+
+## Phase 2 — Integration (Days 4–7)
+
+**Goal:** Wire the Mission Controller panel into the live TempleConsole window
+so it is accessible from the CarrierDeck / CosmicChoicePanel flow.
+
+### Day 4 — TempleConsole Integration
+
+**Tasks:**
+1. Copy `sig_mission_controller_integration.py` to `C:\SIG\`.
+2. Open `cosmic_choice_panel.py` (or whichever panel the ARCHIVE path leads to)
+   and add the Mission Controller widget:
+   ```python
+   import sig_mission_controller_integration as mc_integration
+   # In the panel's __init__ or _build_ui():
+   self._mc_widget = mc_integration.create_mc_widget(parent=self)
+   your_layout.addWidget(self._mc_widget)
+   ```
+3. Alternatively, add as a tab in an existing `QTabWidget`:
+   ```python
+   mc_widget = mc_integration.create_mc_widget()
+   self.tab_widget.addTab(mc_widget, "⬡  ARCHIVE")
+   ```
+4. Launch SIG and navigate to the Archive panel.
+
+**Success criteria:**
+- Mission Controller panel loads without errors ✓
+- COMMAND / BROWSER / TAGS tabs are all visible ✓
+- Database Status shows correct image count ✓
+- No impact on existing SIG panels ✓
+
+---
+
+### Day 5 — UI Smoke Tests & Browser Validation
+
+**Tasks:**
+1. In the BROWSER tab:
+   - Verify thumbnail grid loads recently ingested images
+   - Click a thumbnail — verify detail panel shows metadata + tags
+   - Test the Source and Tag filter dropdowns
+   - Test the search box
+2. In the TAGS tab:
+   - Verify tag vocabulary is populated (system + user tags)
+   - Select an image from BROWSER → switch to TAGS → verify same image is loaded
+   - Apply a manual tag ("quality:favorite") to an image
+   - Verify tag persists after reopening the panel
+3. In the COMMAND tab:
+   - Click "⟳ Refresh Stats" — verify counts are accurate
+   - Click "Apply Migrations" — verify schema is at v4
+
+**Success criteria:**
+- All three tabs functional ✓
+- Tags round-trip correctly (add → close → reopen → still there) ✓
+- Search returns relevant results ✓
+
+---
+
+### Day 6 — Background Worker Integration Test
+
+**Tasks:**
+1. Open the COMMAND tab and click ▶ START SCAN.
+2. Observe the MonitorPanel (right side of COMMAND tab):
+   - Progress bar advances
+   - Live log shows NEW / DUPE / ERR events
+   - Run statistics counters increment
+3. Test ■ STOP — verify the scan halts gracefully mid-run.
+4. After scan completes, switch to BROWSER and click ⟳ Recent — verify new images appear.
+
+**Success criteria:**
+- UI never freezes during scan (worker is on background thread) ✓
+- STOP works within 1–2 files of clicking ✓
+- Post-scan browser refresh shows newly ingested images ✓
+
+---
+
+### Day 7 — Week 1 Review & Integration Checkpoint
+
+**Tasks:**
+1. Run the full test suite again — all still green.
+2. Manually tag 10–20 representative images with meaningful tags
+   (e.g., `planet:jemison`, `ship:frontier`, `quality:wallpaper`).
+3. Test tag-based filtering in the Browser panel.
+4. Write down any bugs or UX issues for Phase 3 polish.
+
+**Deliverable:** Working end-to-end prototype integrated into TempleConsole.
+
+---
+
+## Phase 3 — ML Classification & Dedup Tuning (Days 8–10)
+
+**Goal:** Activate ML scene classification and tune near-dedup sensitivity.
+
+### Day 8 — Install ML Dependencies
+
+**Tasks:**
+1. Choose backend:
+   ```bat
+   :: Option A — torchvision (recommended, ~2 GB download)
+   pip install torch torchvision
+
+   :: Option B — OpenCV only (lightweight, ~15 MB)
+   pip install opencv-python-headless
+   ```
+2. Test classifier standalone:
+   ```python
+   from pathlib import Path
+   from mission_controller.classification.scene_classifier import SceneClassifier
+   sc = SceneClassifier()
+   sc.warm_up()
+   print(sc._backend)   # should be "torchvision_imagenet" or "opencv_histogram"
+   result = sc.classify(Path(r"C:\Users\Games\Pictures\Starfield\some_image.png"))
+   print(result)
+   ```
+3. Run CLI with --classify on a small folder:
+   ```bat
+   python -m mission_controller.ingestion.run_ingest --path "C:\test_sample" --classify -v
+   ```
+
+**Success criteria:**
+- Backend is NOT "stub" ✓
+- `classify()` returns labelled results for real Starfield images ✓
+- Auto-tags appear in DB after classification ✓
+
+---
+
+### Day 9 — ML Integration via UI
+
+**Tasks:**
+1. In COMMAND tab, check ☑ "Run ML scene classifier during scan".
+2. Start a new scan against a folder with 100–500 images.
+3. Observe classification events in the live log.
+4. After scan, filter in BROWSER by "scene:space", "scene:planet", etc.
+5. Review accuracy — note any systematic mis-classifications.
+
+**Tuning options:**
+- Adjust `min_confidence` in `tag_manager.py::bulk_apply_ml_tags()` (default 0.5)
+- If "unknown" is too common: install torchvision instead of OpenCV backend
+- If labels are consistently wrong: adjust `_IMAGENET_HEURISTICS` in `scene_classifier.py`
+
+**Success criteria:**
+- At least 60% of images receive a non-"unknown" label ✓
+- Top tags in Database Status panel make sense for your archive ✓
+
+---
+
+### Day 10 — Near-Dedup Tuning
+
+**Tasks:**
+1. Query near-duplicates in the DB:
+   ```sql
+   SELECT i.file_name, i2.file_name, i.phash, i2.phash
+   FROM images i
+   JOIN images i2 ON i2.id = i.duplicate_of
+   WHERE i.is_duplicate = 1
+   LIMIT 50;
+   ```
+2. Visually inspect the near-duplicate pairs.
+   - If legitimate different screenshots are flagged: LOWER `PHASH_THRESHOLD` (try 4)
+   - If obvious near-dupes are missed: RAISE threshold (try 12)
+3. Re-run ingestion after threshold adjustment to re-evaluate.
+
+**Deliverable:** Tuned dedup settings specific to your Starfield archive.
+
+---
+
+## Phase 4 — Polish & Production Readiness (Days 11–14)
+
+**Goal:** Polish UI, complete documentation, set up automated ingestion scheduling.
+
+### Day 11 — UI Polish Pass
+
+**Tasks:**
+1. Test on a 4K display — verify thumbnail sizes scale correctly.
+2. Adjust `THUMB_SIZE` in `ui/browser_panel.py` if needed (default 160 px).
+3. Add any missing quick-tag buttons in `ui/tagging_panel.py::_ImageTagEditor`.
+4. Verify keyboard navigation works in the tag filter list.
+5. Test "Open in Explorer" button on a real image path.
+
+---
+
+### Day 12 — Scheduled / Automatic Ingestion
+
+**Tasks:**
+1. Create a Windows Scheduled Task to run the CLI ingestor daily:
+   ```bat
+   :: Create task (run as current user, daily at 3 AM)
+   schtasks /create /tn "SIG-MissionController-Ingest" ^
+     /tr "\"C:\SIG\.venv\Scripts\python.exe\" -m mission_controller.ingestion.run_ingest" ^
+     /sc daily /st 03:00 /sd 2026-07-12 /ru %USERNAME%
+   ```
+2. Alternatively, add a Copilot-scheduled task via the Tasks UI for daily ingestion
+   at a convenient time.
+3. Test by triggering the task manually:
+   ```bat
+   schtasks /run /tn "SIG-MissionController-Ingest"
+   ```
+
+**Success criteria:**
+- Task runs without a visible window (add `/f` to overwrite if re-creating) ✓
+- New images picked up automatically on the next SIG launch ✓
+
+---
+
+### Day 13 — Performance Benchmarking
+
+**Tasks:**
+1. Measure ingestion throughput:
+   ```bat
+   python -m mission_controller.ingestion.run_ingest -v 2>&1 | findstr "Time="
+   ```
+   Target: ≥ 50 images/second for already-indexed files (mtime check),
+           ≥ 5 images/second for new files (hash + EXIF extraction).
+2. If performance is slow:
+   - Profile pHash computation: switch to `imagehash` library
+     ```bat
+     pip install imagehash
+     ```
+     Then in `utils/checksums.py` replace `compute_phash` with:
+     ```python
+     def compute_phash(path, **_) -> str:
+         import imagehash
+         from PIL import Image
+         h = imagehash.phash(Image.open(path))
+         return str(h)
+     ```
+3. Test the `similar_to()` API with a large DB (>10k images) — ensure response < 2s.
+
+---
+
+### Day 14 — Final Checklist & Documentation
+
+**Tasks:**
+1. Run all tests one final time:
+   ```bat
+   python -m pytest mission_controller\tests\ -v --tb=short
+   ```
+2. Verify `ARCHITECTURE.md` and `README.md` are accurate.
+3. Tag the Git commit:
+   ```bat
+   git add mission_controller\
+   git commit -m "feat: SIG Mission Controller v1.0.0 — full production release"
+   git tag v1.0.0-mc
+   ```
+4. Archive the deliverables ZIP for backup.
+5. Do a full system demo run: launch SIG → navigate to Archive panel → scan →
+   browse → tag → filter — end-to-end in under 5 minutes.
+
+**Final success criteria:**
+- All tests green ✓
+- CLI ingestion completes without errors ✓
+- UI loads in < 3 seconds ✓
+- 10,000+ image archive browsable with < 200 ms query response ✓
+- Tags persist across app restarts ✓
+- Near-dupe grouping is visually sensible ✓
+
+---
+
+## Contingency Notes
+
+| Risk | Mitigation |
+|------|-----------|
+| Steam screenshots path not found | Use `--path` CLI flag or Manage Sources UI to add manually |
+| torchvision too large to install | Use `opencv-python-headless` backend instead |
+| pHash collisions too high | Lower `PHASH_THRESHOLD` from 8 to 4 in `dedup.py` |
+| Pillow not installed | EXIF falls back to OS stat; install `pip install Pillow` for full EXIF |
+| DB grows very large (>1 GB) | Run `VACUUM` in SQLite; consider archiving old `ingestion_runs` rows |
+| TempleConsole panel integration conflicts | Use `MissionControllerWidget` as a standalone `QDialog` instead |
+
+---
+
+## Quick Reference — Key Commands
+
+```bat
+:: Run tests
+python -m pytest mission_controller\tests\ -v
+
+:: CLI ingest (auto-discover all sources)
+python -m mission_controller.ingestion.run_ingest
+
+:: CLI ingest with extra path + ML classification
+python -m mission_controller.ingestion.run_ingest --path "D:\Starfield" --classify
+
+:: CLI ingest — dry run (discover only, no writes)
+python -m mission_controller.ingestion.run_ingest --dry-run -v
+
+:: Generate sample dataset
+python mission_controller\sample_data\generate_sample_dataset.py
+
+:: Launch full SIG with Mission Controller integrated
+python sig_launcher.py
+
+:: Check DB stats at command line
+python -c "
+from mission_controller.database import get_db
+from mission_controller.query.api import QueryAPI
+db = get_db()
+api = QueryAPI(db)
+import json
+print(json.dumps(api.stats(), indent=2))
+"
+```
+
+---
+
+*SIG Mission Controller — 2-Week Implementation Plan · "Launch in two weeks. Archive in one day."*

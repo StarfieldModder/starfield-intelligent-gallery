@@ -576,7 +576,18 @@ class CinematicController:
         self._overlay   = None
 
     def play(self, panel_id: int) -> None:
-        """Launch the cinematic sequence for panel_id (1..5)."""
+        print(f"[CinematicController]  Playing sequence for panel {panel_id}")
+
+        # Whisper to the Throne (if present)
+        parent = self._parent
+        if parent is not None and hasattr(parent, "speak_to_throne"):
+            try:
+                parent.speak_to_throne(f"A path has been entered: {panel_id}.")
+            except Exception:
+                print(f"[CinematicController] whisper (fallback): path {panel_id} entered.")
+        else:
+            print(f"[CinematicController] whisper: path {panel_id} entered.")
+
         cls = _OVERLAY_MAP.get(panel_id)
         if cls is None:
             print(f"[CinematicController]  No sequence for panel {panel_id}")
@@ -591,6 +602,17 @@ class CinematicController:
     def _on_sequence_done(self) -> None:
         self._overlay = None
         print("[CinematicController]  Sequence complete — back to Carrier Deck.")
+
+        # Whisper to the Throne (if present)
+        parent = self._parent
+        if parent is not None and hasattr(parent, "speak_to_throne"):
+            try:
+                parent.speak_to_throne("The pilgrim has returned to the Hall.")
+            except Exception:
+                print("[CinematicController] whisper (fallback): pilgrim returned.")
+        else:
+            print("[CinematicController] whisper: pilgrim returned.")
+
         if self._on_return:
             self._on_return()
 

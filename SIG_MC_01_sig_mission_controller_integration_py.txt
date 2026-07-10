@@ -1,0 +1,358 @@
+r"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║        ███████╗ ██╗  ██████╗      S I G _ M C _ I N T E G R A T I O N      ║
+║        ██╔════╝ ██║ ██╔════╝      Mission Controller → TempleConsole Hook   ║
+║        ███████╗ ██║ ██║  ███╗                                               ║
+║        ╚════██║ ██║ ██║   ██║     Starfield Intelligent Gallery             ║
+║        ███████║ ██║ ╚██████╔╝                                               ║
+║        ╚══════╝ ╚═╝  ╚═════╝      "One import. The archive wakes up."      ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  File       :  sig_mission_controller_integration.py                        ║
+║  Location   :  C:\SIG\sig_mission_controller_integration.py                 ║
+║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                    ║
+║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                    ║
+║  Version    :  1.0.0  —  2026.07.07                                          ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  PURPOSE                                                                    ║
+║    Drop-in integration module for connecting the SIG Mission Controller     ║
+║    to any existing TempleConsole panel (CarrierDeck, CosmicChoicePanel,     ║
+║    temple_child_widget_alpha/beta, or any QWidget).                         ║
+║                                                                             ║
+║  USAGE — Option A: as a standalone tab widget                               ║
+║    from sig_mission_controller_integration import create_mc_widget          ║
+║    mc = create_mc_widget(parent=self)                                       ║
+║    self.tab_widget.addTab(mc, "⬡  ARCHIVE")                                ║
+║                                                                             ║
+║  USAGE — Option B: full panel factory with error handling                   ║
+║    panel = MCIntegration.build_panel(parent=self)                           ║
+║    layout.addWidget(panel)                                                  ║
+║                                                                             ║
+║  USAGE — Option C: register into sig_launcher.py CarrierDeck flow          ║
+║    See _register_with_carrier_deck() docstring below.                       ║
+║                                                                             ║
+║  INTEGRATION TARGETS (existing SIG files):                                  ║
+║    • temple_child_widget_alpha.py  — Alpha tab host                         ║
+║    • temple_child_widget_beta.py   — Beta tab host                          ║
+║    • cosmic_choice_panel.py        — CosmicChoicePanel ARCHIVE path         ║
+║    • carrier_deck.py               — CarrierDeck ARCHIVE panel slot         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+"""
+
+from __future__ import annotations
+
+import sys
+import traceback
+from pathlib import Path
+from typing import Optional
+
+# ── Ensure C:\SIG is on sys.path when run standalone ──────────────────────────
+_SIG_ROOT = Path(__file__).resolve().parent
+if str(_SIG_ROOT) not in sys.path:
+    sys.path.insert(0, str(_SIG_ROOT))
+
+try:
+    from PySide6.QtCore    import Qt, Signal
+    from PySide6.QtGui     import QFont
+    from PySide6.QtWidgets import (
+        QFrame, QHBoxLayout, QLabel, QMessageBox,
+        QPushButton, QTabWidget, QVBoxLayout, QWidget,
+    )
+    _HAS_QT = True
+except ImportError:
+    _HAS_QT = False
+
+from mission_controller.database.schema     import DatabaseManager, get_db
+from mission_controller.database.migrations import MigrationEngine
+from mission_controller.utils.logging_cfg   import get_logger
+
+log = get_logger(__name__)
+
+# ── SIG palette (matches all MC panels) ────────────────────────────────────────
+_BG     = "#0d0f14"
+_BORDER = "#1e2530"
+_ACCENT = "#00d4ff"
+_RED    = "#ff3333"
+_TEXT   = "#c0ccd8"
+_DIM    = "#5a6472"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Public helper — create a ready-to-use MissionControllerWidget
+# ─────────────────────────────────────────────────────────────────────────────
+def create_mc_widget(
+    db_path: Optional[str | Path] = None,
+    parent: Optional["QWidget"] = None,
+    run_migrations: bool = True,
+) -> "QWidget":
+    """
+    Factory: open (or reuse) the Mission Controller database, apply pending
+    schema migrations, and return a fully wired ``MissionControllerWidget``.
+
+    Parameters
+    ----------
+    db_path : str | Path | None
+        Override the default DB location (~/.temple_console/mission_controller.db).
+    parent : QWidget | None
+        PySide6 parent widget.
+    run_migrations : bool
+        If True (default), apply any pending schema migrations before returning.
+
+    Returns
+    -------
+    MissionControllerWidget
+        Ready to add to any layout, QTabWidget, or QSplitter.
+
+    Raises
+    ------
+    ImportError
+        If PySide6 or the mission_controller package cannot be imported.
+    """
+    if not _HAS_QT:
+        raise ImportError(
+            "PySide6 is required for create_mc_widget(). "
+            "Install it with: pip install PySide6"
+        )
+
+    try:
+        db = get_db(db_path)
+        log.info("[MC Integration]  Database: %s", db.db_path)
+
+        if run_migrations:
+            engine = MigrationEngine(db)
+            status = engine.status()
+            if not status["up_to_date"]:
+                log.info(
+                    "[MC Integration]  Applying migrations (v%d → v%d)…",
+                    status["current_version"], status["latest_version"],
+                )
+                engine.run()
+            log.info("[MC Integration]  Schema v%d — ready.", status["current_version"])
+
+        from mission_controller.ui import MissionControllerWidget
+        widget = MissionControllerWidget(db, parent=parent)
+        log.info("[MC Integration]  MissionControllerWidget created.")
+        return widget
+
+    except Exception as exc:
+        log.error("[MC Integration]  Failed to create widget: %s", exc)
+        traceback.print_exc()
+        # Return a safe error placeholder so the host panel doesn't crash
+        return _ErrorPlaceholder(str(exc), parent=parent)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Class-based integration interface (optional — richer control)
+# ─────────────────────────────────────────────────────────────────────────────
+class MCIntegration:
+    """
+    Class-based integration helper with explicit lifecycle management.
+
+    Useful when you need to hold a reference to the DB or run additional
+    setup before or after the widget is created.
+
+    Example usage in temple_child_widget_alpha.py::
+
+        from sig_mission_controller_integration import MCIntegration
+
+        class TempleChildWidgetAlpha(QWidget):
+            def __init__(self, parent=None):
+                super().__init__(parent)
+                self._mc = MCIntegration()
+                layout = QVBoxLayout(self)
+                layout.addWidget(self._mc.widget)
+    """
+
+    def __init__(
+        self,
+        db_path: Optional[str | Path] = None,
+        parent: Optional["QWidget"] = None,
+    ) -> None:
+        self._db: Optional[DatabaseManager] = None
+        self._widget: Optional["QWidget"] = None
+        self._parent = parent
+
+        try:
+            self._db = get_db(db_path)
+            engine = MigrationEngine(self._db)
+            if not engine.status()["up_to_date"]:
+                engine.run()
+            from mission_controller.ui import MissionControllerWidget
+            self._widget = MissionControllerWidget(self._db, parent=parent)
+            log.info("[MCIntegration class]  Widget ready.")
+        except Exception as exc:
+            log.error("[MCIntegration class]  Error: %s", exc)
+            traceback.print_exc()
+            self._widget = _ErrorPlaceholder(str(exc), parent=parent)
+
+    @property
+    def widget(self) -> "QWidget":
+        """The MissionControllerWidget (or error placeholder)."""
+        return self._widget  # type: ignore[return-value]
+
+    @property
+    def db(self) -> Optional[DatabaseManager]:
+        """The DatabaseManager instance (None if init failed)."""
+        return self._db
+
+    @classmethod
+    def build_panel(
+        cls,
+        db_path: Optional[str | Path] = None,
+        parent: Optional["QWidget"] = None,
+    ) -> "QWidget":
+        """Convenience classmethod — create and return just the widget."""
+        return cls(db_path=db_path, parent=parent).widget
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Integration guide for existing SIG panel files
+# ─────────────────────────────────────────────────────────────────────────────
+def _register_with_carrier_deck() -> None:
+    """
+    DOCUMENTATION — how to wire Mission Controller into CarrierDeck.
+
+    In carrier_deck.py, ``on_panel_selected`` already routes panel_id=2 to
+    the ARCHIVE panel.  Add the following in that handler::
+
+        # carrier_deck.py  (or wherever on_panel_selected is defined)
+        elif panel_id == 2:  # ARCHIVE
+            import sig_mission_controller_integration as mc_int
+            archive = mc_int.create_mc_widget(parent=self)
+            archive.showMaximized()   # or add to a layout
+            _alive.append(archive)
+
+    ──────────────────────────────────────────────────────────────────
+    Integration into temple_child_widget_alpha.py (JOURNEY/ARCHIVE host):
+
+        from sig_mission_controller_integration import create_mc_widget
+
+        class TempleChildWidgetAlpha(QWidget):
+            def __init__(self, parent=None):
+                super().__init__(parent)
+                layout = QVBoxLayout(self)
+                # Header or other existing content here…
+                mc_widget = create_mc_widget(parent=self)
+                layout.addWidget(mc_widget)
+
+    ──────────────────────────────────────────────────────────────────
+    Integration into temple_child_widget_beta.py (ARTIFACTS/COMPANIONS host):
+
+        from sig_mission_controller_integration import create_mc_widget
+
+        class TempleChildWidgetBeta(QWidget):
+            def __init__(self, parent=None):
+                super().__init__(parent)
+                layout = QVBoxLayout(self)
+                self._tabs = QTabWidget()
+                # … existing tabs …
+                mc_widget = create_mc_widget(parent=self)
+                self._tabs.addTab(mc_widget, "⬡  IMAGE ARCHIVE")
+                layout.addWidget(self._tabs)
+    """
+    # This function is documentation-only; it is never called.
+    pass
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Error placeholder widget (shown if import/DB fails — never crashes host)
+# ─────────────────────────────────────────────────────────────────────────────
+class _ErrorPlaceholder(QWidget if _HAS_QT else object):  # type: ignore[misc]
+    """
+    Safe fallback widget displayed if Mission Controller fails to initialise.
+    Prevents the host panel from crashing or showing a blank area.
+    """
+
+    def __init__(self, error_message: str, parent=None) -> None:
+        if not _HAS_QT:
+            return
+        super().__init__(parent)
+        self.setStyleSheet(f"background:{_BG}; color:{_TEXT};")
+
+        v = QVBoxLayout(self)
+        v.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        icon = QLabel("⚠")
+        icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        icon.setFont(QFont("Courier New", 48))
+        icon.setStyleSheet(f"color:{_RED};")
+        v.addWidget(icon)
+
+        title = QLabel("MISSION CONTROLLER — OFFLINE")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title.setFont(QFont("Courier New", 14, QFont.Weight.Bold))
+        title.setStyleSheet(f"color:{_RED}; letter-spacing:2px;")
+        v.addWidget(title)
+
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setStyleSheet(f"color:{_BORDER};")
+        v.addWidget(sep)
+
+        err_lbl = QLabel(f"Error:\n{error_message}")
+        err_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        err_lbl.setWordWrap(True)
+        err_lbl.setStyleSheet(f"color:{_DIM}; font-size:11px; font-family:'Courier New';")
+        v.addWidget(err_lbl)
+
+        hint = QLabel(
+            "Ensure mission_controller/ is in C:\\SIG\\ and dependencies are installed:\n"
+            "  pip install -r mission_controller\\requirements.txt"
+        )
+        hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        hint.setWordWrap(True)
+        hint.setStyleSheet(f"color:{_DIM}; font-size:10px; font-family:'Courier New';")
+        v.addWidget(hint)
+
+        retry_btn = QPushButton("Retry Import")
+        retry_btn.setStyleSheet(
+            f"QPushButton {{ background:#14181f; border:1px solid {_BORDER}; "
+            f"color:{_ACCENT}; font-size:11px; padding:6px 20px; border-radius:4px; }}"
+            f"QPushButton:hover {{ border-color:{_ACCENT}; }}"
+        )
+        retry_btn.clicked.connect(self._retry)
+        v.addWidget(retry_btn)
+        v.addStretch()
+
+        log.error("[MC Integration]  Error placeholder shown: %s", error_message)
+
+    def _retry(self) -> None:
+        """Attempt to reload the module (useful after pip install without restart)."""
+        import importlib
+        try:
+            import mission_controller  # noqa: F401
+            importlib.reload(mission_controller)
+            QMessageBox.information(
+                self, "Reload",
+                "Mission Controller module reloaded.\n"
+                "Close and reopen this panel to apply."
+            )
+        except Exception as exc:
+            QMessageBox.critical(self, "Retry Failed", str(exc))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Standalone demo — run this file directly to preview the widget
+# ─────────────────────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    import sys
+
+    if not _HAS_QT:
+        print("PySide6 not found.  Install with: pip install PySide6")
+        sys.exit(1)
+
+    from PySide6.QtWidgets import QApplication, QMainWindow
+
+    app = QApplication(sys.argv)
+
+    win = QMainWindow()
+    win.setWindowTitle("SIG Mission Controller — Standalone Preview")
+    win.setStyleSheet(f"QMainWindow {{ background: {_BG}; }}")
+    win.resize(1400, 900)
+
+    mc = create_mc_widget()
+    win.setCentralWidget(mc)
+    win.show()
+
+    print("[SIG MC Integration]  Standalone preview running.")
+    print("[SIG MC Integration]  DB:", get_db().db_path)
+    sys.exit(app.exec())

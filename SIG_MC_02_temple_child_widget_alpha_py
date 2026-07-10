@@ -1,0 +1,232 @@
+r"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║   ███████╗ ██╗  ██████╗      T E M P L E _ C H I L D _ A L P H A . P Y     ║
+║   ██╔════╝ ██║ ██╔════╝      JOURNEY  ·  ARCHIVE  —  Panel Host             ║
+║   ███████╗ ██║ ██║  ███╗                                                    ║
+║   ╚════██║ ██║ ██║   ██║     TempleConsole  ·  PySide6                      ║
+║   ███████║ ██║ ╚██████╔╝                                                    ║
+║   ╚══════╝ ╚═╝  ╚═════╝      "Alpha terminal.  First to rise."             ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  File       :  temple_child_widget_alpha.py                                 ║
+║  Location   :  C:\SIG\temple_child_widget_alpha.py                          ║
+║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                    ║
+║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                    ║
+║  Version    :  1.0.0  —  2026.07.07                                          ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  PANEL IDs (from sig_launcher.py / CarrierDeck)                             ║
+║    1 = JOURNEY                                                               ║
+║    2 = ARCHIVE  ←  Mission Controller lives here                            ║
+║                                                                             ║
+║  USAGE  (from carrier_deck.py or cosmic_choice_panel.py)                    ║
+║    from temple_child_widget_alpha import TempleChildWidgetAlpha             ║
+║    widget = TempleChildWidgetAlpha(panel_id=2, parent=self)                 ║
+║    widget.show()                                                            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+from typing import Optional
+
+# ── Ensure C:\SIG is on sys.path when run standalone ──────────────────────────
+_SIG_ROOT = Path(__file__).resolve().parent
+if str(_SIG_ROOT) not in sys.path:
+    sys.path.insert(0, str(_SIG_ROOT))
+
+from PySide6.QtCore    import QPropertyAnimation, Qt, Signal
+from PySide6.QtGui     import QFont, QLinearGradient, QPainter, QColor
+from PySide6.QtWidgets import (
+    QFrame, QHBoxLayout, QLabel, QPushButton,
+    QSizePolicy, QStackedWidget, QTabWidget, QVBoxLayout, QWidget,
+)
+
+from sig_mission_controller_integration import create_mc_widget
+
+# ── SIG dark palette ────────────────────────────────────────────────────────
+_BG       = "#0d0f14"
+_SURFACE  = "#14181f"
+_BORDER   = "#1e2530"
+_ACCENT   = "#00d4ff"
+_GREEN    = "#00ff88"
+_ORANGE   = "#ff8c00"
+_TEXT     = "#c0ccd8"
+_DIM      = "#5a6472"
+_RED      = "#ff3333"
+
+# ── Panel metadata ───────────────────────────────────────────────────────────
+PANEL_LABELS = {
+    1: ("JOURNEY",  "⟁",  _ACCENT),
+    2: ("ARCHIVE",  "⬡",  _GREEN),
+}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TempleChildWidgetAlpha
+# ─────────────────────────────────────────────────────────────────────────────
+class TempleChildWidgetAlpha(QWidget):
+    """
+    Host widget for CarrierDeck panels 1 (JOURNEY) and 2 (ARCHIVE).
+
+    Panel 2 (ARCHIVE) automatically embeds the SIG Mission Controller.
+    Panel 1 (JOURNEY) is a placeholder that you can replace with your own
+    lore/journal content.
+
+    Signals
+    -------
+    back_requested : no args
+        Emitted when the user clicks the ← BACK navigation button.
+    """
+
+    back_requested: Signal = Signal()
+
+    def __init__(
+        self,
+        panel_id: int = 2,
+        parent: Optional[QWidget] = None,
+    ) -> None:
+        super().__init__(parent)
+        self._panel_id = panel_id
+        label, glyph, colour = PANEL_LABELS.get(panel_id, ("PANEL", "◈", _TEXT))
+        self._label  = label
+        self._glyph  = glyph
+        self._colour = colour
+
+        self.setWindowTitle(f"SIG — {label}")
+        self.setStyleSheet(f"QWidget {{ background:{_BG}; color:{_TEXT}; }}")
+        self._build_ui()
+
+    # ── UI construction ──────────────────────────────────────────────────────
+    def _build_ui(self) -> None:
+        root = QVBoxLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(0)
+
+        # Header bar
+        root.addWidget(self._build_header())
+
+        # Separator
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setStyleSheet(f"color:{self._colour}; border-top:2px solid {self._colour};")
+        sep.setFixedHeight(2)
+        root.addWidget(sep)
+
+        # Content area (stack so future panels can slide in)
+        self._stack = QStackedWidget()
+        self._stack.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
+
+        if self._panel_id == 2:
+            self._stack.addWidget(self._build_archive_panel())
+        else:
+            self._stack.addWidget(self._build_journey_panel())
+
+        root.addWidget(self._stack)
+
+    def _build_header(self) -> QWidget:
+        header = QWidget()
+        header.setFixedHeight(48)
+        header.setStyleSheet(f"background:{_SURFACE}; border-bottom:1px solid {_BORDER};")
+
+        h = QHBoxLayout(header)
+        h.setContentsMargins(16, 0, 16, 0)
+
+        # Back button
+        back_btn = QPushButton("← BACK")
+        back_btn.setFixedWidth(90)
+        back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        back_btn.setStyleSheet(
+            f"QPushButton {{ background:transparent; border:1px solid {_BORDER}; "
+            f"color:{_DIM}; font-size:11px; font-family:'Courier New'; "
+            f"padding:4px 10px; border-radius:4px; }}"
+            f"QPushButton:hover {{ border-color:{self._colour}; color:{self._colour}; }}"
+        )
+        back_btn.clicked.connect(self.back_requested.emit)
+        h.addWidget(back_btn)
+
+        # Glyph
+        glyph_lbl = QLabel(self._glyph)
+        glyph_lbl.setFont(QFont("Courier New", 18))
+        glyph_lbl.setStyleSheet(f"color:{self._colour}; margin-left:8px;")
+        h.addWidget(glyph_lbl)
+
+        # Title
+        title = QLabel(self._label)
+        title.setFont(QFont("Courier New", 14, QFont.Weight.Bold))
+        title.setStyleSheet(
+            f"color:{self._colour}; letter-spacing:4px; margin-left:6px;"
+        )
+        h.addWidget(title)
+
+        h.addStretch()
+
+        # Version stamp
+        ver = QLabel("v1.0.0  ·  SIG-MC")
+        ver.setStyleSheet(f"color:{_DIM}; font-size:10px; font-family:'Courier New';")
+        h.addWidget(ver)
+
+        return header
+
+    def _build_archive_panel(self) -> QWidget:
+        """
+        ARCHIVE (panel_id=2) — Mission Controller embedded directly.
+        """
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        mc_widget = create_mc_widget(parent=container)
+        layout.addWidget(mc_widget)
+        return container
+
+    def _build_journey_panel(self) -> QWidget:
+        """
+        JOURNEY (panel_id=1) — placeholder; replace with your lore/journal UI.
+        """
+        container = QWidget()
+        container.setStyleSheet(f"background:{_BG};")
+        v = QVBoxLayout(container)
+        v.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        icon = QLabel("⟁")
+        icon.setFont(QFont("Courier New", 64))
+        icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        icon.setStyleSheet(f"color:{_ACCENT};")
+        v.addWidget(icon)
+
+        lbl = QLabel("JOURNEY")
+        lbl.setFont(QFont("Courier New", 20, QFont.Weight.Bold))
+        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl.setStyleSheet(f"color:{_ACCENT}; letter-spacing:6px;")
+        v.addWidget(lbl)
+
+        sub = QLabel("Lore · Journal · Mission Log")
+        sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        sub.setStyleSheet(f"color:{_DIM}; font-size:12px; font-family:'Courier New';")
+        v.addWidget(sub)
+
+        placeholder = QLabel("[JOURNEY panel content goes here]")
+        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        placeholder.setStyleSheet(
+            f"color:{_DIM}; font-size:11px; font-family:'Courier New'; margin-top:24px;"
+        )
+        v.addWidget(placeholder)
+        return container
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Standalone preview
+# ─────────────────────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    from PySide6.QtWidgets import QApplication
+
+    app = QApplication(sys.argv)
+    w = TempleChildWidgetAlpha(panel_id=2)
+    w.resize(1400, 900)
+    w.back_requested.connect(lambda: print("[Alpha]  Back requested."))
+    w.show()
+    sys.exit(app.exec())

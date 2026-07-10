@@ -1,0 +1,258 @@
+r"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║   ███████╗ ██╗  ██████╗      M I S S I O N _ C O N T R O L L E R           ║
+║   ██╔════╝ ██║ ██╔════╝      Starfield Image Archive Subsystem              ║
+║   ███████╗ ██║ ██║  ███╗                                                    ║
+║   ╚════██║ ██║ ██║   ██║     TempleConsole  ·  PySide6  ·  SQLite           ║
+║   ███████║ ██║ ╚██████╔╝                                                    ║
+║   ╚══════╝ ╚═╝  ╚═════╝      "Every image is a log entry."                 ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  File       :  README.md                                                    ║
+║  Location   :  C:\SIG\mission_controller\README.md                          ║
+║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                    ║
+║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                    ║
+║  Version    :  1.0.0  —  2026.07.07                                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+"""
+
+# SIG Mission Controller
+
+**Subsystem of the Starfield Intelligent Gallery (SIG) · TempleConsole**
+
+The Mission Controller ingests, indexes, deduplicates, classifies, and serves
+your entire Starfield screenshot archive — tens of thousands of images — from a
+local SQLite database into the TempleConsole PySide6 interface.
+
+---
+
+## Quick Start (Windows)
+
+```bat
+cd C:\SIG
+.venv\Scripts\activate
+
+:: 1. Install dependencies
+pip install -r mission_controller\requirements.txt
+
+:: 2. Run the CLI ingestor against your default folder
+python -m mission_controller.ingestion.run_ingest
+
+:: 3. (Optional) also scan extra drives and run ML classification
+python -m mission_controller.ingestion.run_ingest --path "D:\Starfield" --classify
+
+:: 4. Run the full TempleConsole with Mission Controller integrated
+python sig_launcher.py
+```
+
+---
+
+## Project Layout
+
+```
+C:\SIG\
+├── sig_launcher.py                      ← SIG entry point (cinematic chain)
+├── sig_mission_controller_integration.py ← One-line MC integration for SIG panels
+│
+└── mission_controller/                  ← Mission Controller package root
+    ├── README.md                        ← This file
+    ├── requirements.txt                 ← pip dependencies
+    ├── __init__.py
+    │
+    ├── database/
+    │   ├── schema.py        ← DatabaseManager + full DDL (SQLite WAL)
+    │   └── migrations.py    ← MigrationEngine (schema versioning)
+    │
+    ├── ingestion/
+    │   ├── discovery.py     ← SourceDiscovery (Steam/Xbox/NVIDIA/AMD/manual)
+    │   ├── ingestor.py      ← ImageIngestor pipeline orchestrator
+    │   ├── dedup.py         ← DedupEngine (SHA-256 exact + pHash near-dedup)
+    │   ├── metadata.py      ← MetadataExtractor (EXIF via Pillow, OS fallback)
+    │   └── run_ingest.py    ← CLI standalone ingestion script
+    │
+    ├── classification/
+    │   ├── base_classifier.py   ← Abstract BaseClassifier interface
+    │   ├── scene_classifier.py  ← SceneClassifier (torchvision → OpenCV → stub)
+    │   └── tag_manager.py       ← TagManager CRUD + bulk ML tagging
+    │
+    ├── query/
+    │   └── api.py           ← QueryAPI (by_tag, by_date, by_source, search, similar)
+    │
+    ├── workers/
+    │   ├── batch_worker.py  ← BatchIngestionWorker (thread) + QtBatchWorker (QThread)
+    │   └── progress_bus.py  ← ProgressBus (thread-safe pub/sub event bus)
+    │
+    ├── ui/
+    │   ├── mission_controller_widget.py ← MissionControllerWidget (top-level, add to any tab)
+    │   ├── browser_panel.py             ← ImageBrowserPanel (grid + detail)
+    │   ├── tagging_panel.py             ← TaggingPanel (tag vocabulary + editor)
+    │   └── monitor_panel.py             ← MonitorPanel (live ingestion progress)
+    │
+    ├── utils/
+    │   ├── checksums.py     ← SHA-256 + pure-Python pHash + Hamming distance
+    │   ├── paths.py         ← walk_images, discover_steam/xbox/nvidia/amd, etc.
+    │   └── logging_cfg.py   ← [SIG-MC] logger configuration
+    │
+    ├── sample_data/
+    │   └── generate_sample_dataset.py  ← Creates 16 synthetic PNGs + seeds DB
+    │
+    └── tests/
+        ├── test_schema.py       ← DatabaseManager + MigrationEngine tests
+        ├── test_ingestion.py    ← DedupEngine + MetadataExtractor + ImageIngestor
+        ├── test_query_api.py    ← QueryAPI + TagManager tests
+        ├── test_classifier.py   ← SceneClassifier + TagManager ML tests
+        └── test_checksums.py    ← SHA-256 + Hamming / pHash tests
+```
+
+---
+
+## Integration into TempleConsole
+
+### Option A — Minimal (single tab widget)
+
+```python
+# In any SIG panel that has a QTabWidget, QSplitter, or layout:
+from mission_controller.database import get_db
+from mission_controller.ui import MissionControllerWidget
+
+db = get_db()                          # opens ~/.temple_console/mission_controller.db
+mc = MissionControllerWidget(db)
+self.tab_widget.addTab(mc, "⬡  ARCHIVE")
+```
+
+### Option B — Full integration via sig_mission_controller_integration.py
+
+```python
+# Drop this anywhere in your CarrierDeck / CosmicChoicePanel:
+import sig_mission_controller_integration as mc_integration
+mc_widget = mc_integration.create_mc_widget(parent=self)
+layout.addWidget(mc_widget)
+```
+
+See `sig_mission_controller_integration.py` for the complete wiring pattern.
+
+---
+
+## CLI Reference
+
+```
+python -m mission_controller.ingestion.run_ingest [OPTIONS]
+
+  --path DIR     Extra image folder (repeat for multiple)
+  --db PATH      SQLite path (default: ~/.temple_console/mission_controller.db)
+  --classify     Run ML scene classifier on newly ingested images
+  --external     Also scan external/removable drives (slow)
+  --dry-run      Discover sources only — no DB writes
+  -v / --verbose Enable DEBUG logging
+```
+
+---
+
+## Auto-discovered Source Paths
+
+| Source    | Windows default path |
+|-----------|----------------------|
+| Primary   | `C:\Users\Games\Pictures\Starfield` |
+| Steam     | `C:\Program Files (x86)\Steam\userdata\<id>\760\remote\1716740\screenshots\` |
+| Xbox      | `%USERPROFILE%\Videos\Captures`  ·  `%USERPROFILE%\Pictures\Screenshots` |
+| NVIDIA    | `%USERPROFILE%\Videos`  ·  `%PUBLIC%\Videos` |
+| AMD       | `%USERPROFILE%\Videos\AMD ReLive` |
+
+Add any additional paths with `--path` or via the **Manage Sources…** dialog in the UI.
+
+---
+
+## SQLite Schema (v4)
+
+| Table | Purpose |
+|-------|---------|
+| `images` | One row per canonical image — path, checksums, dimensions, EXIF, source, timestamps |
+| `tags` | Tag vocabulary with category (`user` / `ml` / `system`) |
+| `image_tags` | Many-to-many; stores confidence (1.0 = manual, 0–1 = ML) |
+| `sources` | Watched directories / drives |
+| `ingestion_runs` | Audit log of every scan run |
+| `ml_results` | Raw per-model predictions per image |
+| `schema_migrations` | Version tracking for safe forward migrations |
+
+---
+
+## Deduplication Strategy
+
+**Stage 1 — Exact dedup (SHA-256)**
+Every file is hashed. If the hex digest already exists in `images.sha256`, the
+file is skipped — even if renamed or moved.
+
+**Stage 2 — Near-dedup (perceptual hash / pHash)**
+A 64-bit DCT pHash is computed. If the Hamming distance to any existing pHash
+is ≤ 8, the image is flagged `is_duplicate=1` and linked to the canonical via
+`duplicate_of`. Near-duplicates are still ingested so you can review them in the
+Browser panel.
+
+Pillow is used for pHash when available; a pure-Python DCT fallback is included
+so the pipeline works without any ML dependencies.
+
+---
+
+## ML Classification
+
+The `SceneClassifier` uses a three-tier backend:
+
+1. **Fine-tuned torchvision ResNet-50** — supply `weights_path` pointing to
+   a `.pth` checkpoint trained on Starfield scene labels.
+2. **Zero-shot ImageNet ResNet-50** — maps ImageNet categories to Starfield
+   labels via a curated heuristic table. No extra data required; accuracy ~55%.
+3. **OpenCV histogram fallback** — colour-statistics heuristics. Accuracy ~40%.
+4. **Stub** — always returns `("unknown", 0.0)`. Used when no dependencies exist.
+
+Install ML dependencies:
+```bat
+:: Recommended (ResNet-50 ~2 GB download)
+pip install torch torchvision
+
+:: Lightweight colour-heuristic fallback only
+pip install opencv-python-headless
+```
+
+---
+
+## Running the Tests
+
+```bat
+cd C:\SIG
+python -m pytest mission_controller\tests\ -v
+```
+
+All tests are dependency-free (no Qt, no Pillow required for core tests).
+Tests that need Pillow skip gracefully when it is absent.
+
+---
+
+## Generating the Sample Dataset
+
+```bat
+cd C:\SIG
+python mission_controller\sample_data\generate_sample_dataset.py
+```
+
+Creates 16 synthetic PNG images and a pre-seeded `sample_mission_controller.db`
+in `mission_controller\sample_data\`. Useful for UI development and demo runs.
+
+---
+
+## Safety & Privacy
+
+- **No images are uploaded anywhere.** The entire pipeline is local-first.
+- The SQLite database lives in `~/.temple_console/mission_controller.db` by default.
+- Image bytes are never stored in the DB — only paths, checksums, and metadata.
+- External drives are opt-in (`--external` flag or checkbox in UI).
+
+---
+
+## Version History
+
+| Version | Date | Notes |
+|---------|------|-------|
+| 1.0.0 | 2026-07-07 | Initial release — full ingestion, dedup, classification, UI, tests |
+
+---
+
+*SIG Mission Controller — "Every image is a log entry. The manifest reads them all."*

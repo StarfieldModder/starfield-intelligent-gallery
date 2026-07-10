@@ -1,0 +1,27 @@
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║   SIG Mission Controller  ·  pyproject.toml                          ║
+# ║   Author  :  Mark J. Latsha  (StarfieldModder / Games)              ║
+# ║   Co-Auth :  Microsoft Copilot                                       ║
+# ║   Version :  1.0.0  —  2026.07.07                                    ║
+# ╚══════════════════════════════════════════════════════════════════════╝
+#
+# PEP 517/518 build system declaration.
+# setup.cfg holds all package metadata and dependencies.
+#
+# Install (editable — recommended during development):
+#   cd C:\SIG
+#   pip install -e .
+#
+# Install (regular — for production venv):
+#   pip install .
+
+[build-system]
+requires      = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+# ── Optional: override metadata here if not using setup.cfg ─────────────
+# [project]
+# name    = "sig-mission-controller"
+# version = "1.0.0"
+# ...
+# (Left commented out — setup.cfg is the authoritative source)

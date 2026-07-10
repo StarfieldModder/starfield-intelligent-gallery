@@ -1,0 +1,164 @@
+"""
+Lightweight Image-Based Mission Controller
+------------------------------------------
+Fallback controller for Hybrid Mode.
+
+Uses real Starfield images from:
+    C:\SIG\sample_images
+
+Provides:
+    • Image scanning
+    • Metadata extraction (name, resolution)
+    • Thumbnail generation
+    • A clean QWidget for embedding in TempleConsole, Alpha, Beta, etc.
+"""
+
+import os
+from pathlib import Path
+
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap, QImage
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QLabel, QScrollArea, QFrame
+)
+
+
+class LightweightImageController(QWidget):
+    """
+    Lightweight fallback Mission Controller.
+    Displays Starfield images as thumbnails with metadata.
+    """
+
+    def __init__(self, console=None, parent=None):
+        super().__init__(parent)
+
+        self.console = console
+        self.image_folder = Path(r"C:\SIG\sample_images")
+        self.images = []
+
+        self._scan_images()
+        self._build_ui()
+
+    # ----------------------------------------------------------------------
+    # 1. Scan folder and extract metadata
+    # ----------------------------------------------------------------------
+    def _scan_images(self):
+        supported = (".jpg", ".jpeg", ".png", ".bmp", ".gif")
+
+        if not self.image_folder.exists():
+            if self.console:
+                self.console._text_view.append(
+                    f"<p>Lightweight MC: Folder not found: {self.image_folder}</p>"
+                )
+            return
+
+        for filename in os.listdir(self.image_folder):
+            if filename.lower().endswith(supported):
+                full_path = self.image_folder / filename
+
+                img = QImage(str(full_path))
+                if img.isNull():
+                    resolution = (None, None)
+                else:
+                    resolution = (img.width(), img.height())
+
+                self.images.append({
+                    "path": str(full_path),
+                    "name": filename,
+                    "resolution": resolution,
+                })
+
+        if self.console:
+            self.console._text_view.append(
+                f"<p>Lightweight MC: Loaded <b>{len(self.images)}</b> images.</p>"
+            )
+
+    # ----------------------------------------------------------------------
+    # 3. Optional database sync (Hybrid Mode)
+    # ----------------------------------------------------------------------
+    def _sync_to_database(self):
+        """
+        Sync lightweight image metadata into the database-backed Mission Controller,
+        if the database is available. Safe: never crashes.
+        """
+        try:
+            from mission_controller.database.schema import get_db
+            db = get_db()
+        except Exception:
+            # Database not available — skip silently
+            if self.console:
+                self.console._text_view.append(
+                    "<p>Lightweight MC: Database not available — skipping sync.</p>"
+                )
+            return
+
+        # Insert records
+        inserted = 0
+        for img in self.images:
+            try:
+                db.insert_image_record(
+                    path=img["path"],
+                    name=img["name"],
+                    width=img["resolution"][0],
+                    height=img["resolution"][1],
+                )
+                inserted += 1
+            except Exception:
+                # Skip bad records, continue safely
+                continue
+
+        if self.console:
+            self.console._text_view.append(
+                f"<p>Lightweight MC: Synced <b>{inserted}</b> images to database.</p>"
+            )
+
+    # ----------------------------------------------------------------------
+    # 2. Build UI widget
+    # ----------------------------------------------------------------------
+    def _build_ui(self):
+        self.setStyleSheet("background-color: #0d0f14; color: #c0ccd8;")
+
+        layout = QVBoxLayout(self)
+        layout.setSpacing(12)
+
+        title = QLabel("Lightweight Mission Controller — Starfield Image Archive")
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        layout.addWidget(title)
+
+        # Scroll area for thumbnails
+        scroll = QScrollArea(self)
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("border: none;")
+
+        container = QWidget()
+        vbox = QVBoxLayout(container)
+        vbox.setSpacing(20)
+
+        # Add thumbnails
+        for img in self.images:
+            frame = QFrame()
+            f_layout = QVBoxLayout(frame)
+            f_layout.setSpacing(6)
+
+            # Thumbnail
+            pix = QPixmap(img["path"]).scaledToWidth(300, Qt.SmoothTransformation)
+            thumb = QLabel()
+            thumb.setPixmap(pix)
+            thumb.setAlignment(Qt.AlignCenter)
+            f_layout.addWidget(thumb)
+
+            # Metadata
+            meta = QLabel(
+                f"{img['name']}<br>"
+                f"{img['resolution'][0]} × {img['resolution'][1]}"
+            )
+            meta.setAlignment(Qt.AlignCenter)
+            meta.setStyleSheet("font-size: 12px; color: #5a6472;")
+            f_layout.addWidget(meta)
+
+            vbox.addWidget(frame)
+
+        vbox.addStretch()
+        scroll.setWidget(container)
+        layout.addWidget(scroll)

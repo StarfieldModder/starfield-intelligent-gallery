@@ -467,6 +467,17 @@ class CarrierDeck(QWidget):
 
     def _on_panel_clicked(self, panel_id: int) -> None:
         print(f"[CarrierDeck]  Panel {panel_id} selected.")
+
+          # Whisper to the Throne (if present)
+        parent = self.parent()
+        if parent is not None and hasattr(parent, "speak_to_throne"):
+            try:
+                parent.speak_to_throne(f"A sovereign has stepped forward: {panel_id}.")
+            except Exception:
+                print(f"[CarrierDeck] whisper (fallback): sovereign {panel_id} stepped forward.")
+        else:
+            print(f"[CarrierDeck] whisper: sovereign {panel_id} stepped forward.")
+
         self.panel_selected.emit(panel_id)
 
     # ── Paint (ambient star-dust) ─────────────────────────────────────────────

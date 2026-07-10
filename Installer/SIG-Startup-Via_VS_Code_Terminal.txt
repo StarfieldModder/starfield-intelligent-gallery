@@ -1,0 +1,1 @@
+.venv\Scripts\python.exe sig_diagnostics.py.venv\Scripts\python.exe ui\space_flight_widget.py.venv\Scripts\python.exe sig_launcher.py

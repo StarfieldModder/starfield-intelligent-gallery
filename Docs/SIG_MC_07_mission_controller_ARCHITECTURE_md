@@ -1,0 +1,324 @@
+r"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║   ███████╗ ██╗  ██████╗      A R C H I T E C T U R E . M D                 ║
+║   ██╔════╝ ██║ ██╔════╝      SIG Mission Controller — System Design         ║
+║   ███████╗ ██║ ██║  ███╗                                                    ║
+║   ╚════██║ ██║ ██║   ██║     TempleConsole · PySide6 · SQLite · Local-First ║
+║   ███████║ ██║ ╚██████╔╝                                                    ║
+║   ╚══════╝ ╚═╝  ╚═════╝      "The architecture is the mission."            ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  File       :  ARCHITECTURE.md                                              ║
+║  Location   :  C:\SIG\mission_controller\ARCHITECTURE.md                   ║
+║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                   ║
+║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                   ║
+║  Version    :  1.0.0  —  2026.07.07                                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+"""
+
+# SIG Mission Controller — Architecture
+
+## 1. Textual Architecture Diagram
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                       SIG / TempleConsole                                │
+│                       sig_launcher.py                                    │
+│   ┌───────────────────────────────────────────────────────────────────┐  │
+│   │                  CarrierDeck / CosmicChoicePanel                  │  │
+│   │   ┌────────────────────────────────────────────────────────────┐  │  │
+│   │   │           MissionControllerWidget  (PySide6 QWidget)       │  │  │
+│   │   │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐ │  │  │
+│   │   │  │  COMMAND tab │  │  BROWSER tab │  │    TAGS tab      │ │  │  │
+│   │   │  │ ControlPanel │  │ ImageBrowser │  │  TaggingPanel    │ │  │  │
+│   │   │  │ MonitorPanel │  │    Panel     │  │  TagPalette      │ │  │  │
+│   │   │  └──────┬───────┘  └──────┬───────┘  └────────┬─────────┘ │  │  │
+│   │   │         │                 │                    │           │  │  │
+│   │   │  ┌──────▼─────────────────▼────────────────────▼─────────┐ │  │  │
+│   │   │  │                    QueryAPI                            │ │  │  │
+│   │   │  │   by_tag · by_date · by_source · search · similar_to  │ │  │  │
+│   │   │  └──────────────────────────────────────────────────────-┘ │  │  │
+│   │   └────────────────────────────────────────────────────────────┘  │  │
+│   └───────────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────────────┘
+                               │  ▲
+                signals (Qt)   │  │  query results
+                               ▼  │
+┌──────────────────────────────────────────────────────────────────────────┐
+│                       Background Layer                                   │
+│                                                                          │
+│   ┌──────────────────────────────────────────────────────────────────┐  │
+│   │                  QtBatchWorker (QThread)                          │  │
+│   │                  BatchIngestionWorker (daemon thread)             │  │
+│   │   ┌──────────────────┐  ┌──────────────┐  ┌──────────────────┐  │  │
+│   │   │  SourceDiscovery  │  │ ImageIngestor│  │  SceneClassifier │  │  │
+│   │   │  (auto-detect    │  │  (pipeline   │  │  (torchvision /  │  │  │
+│   │   │   Steam/Xbox/    │  │   per file)  │  │   OpenCV / stub) │  │  │
+│   │   │   NVIDIA/AMD)    │  └──────┬───────┘  └─────────┬────────┘  │  │
+│   │   └──────────────────┘         │                     │           │  │
+│   │                        ┌───────▼──────────┐          │           │  │
+│   │                        │   DedupEngine     │          │           │  │
+│   │                        │  SHA-256 exact   │          │           │  │
+│   │                        │  pHash near-dedup│          │           │  │
+│   │                        └───────┬──────────┘          │           │  │
+│   │                                │                      │           │  │
+│   │                     ┌──────────▼──────────────────────▼─────────┐│  │
+│   │                     │          MetadataExtractor                 ││  │
+│   │                     │   Pillow EXIF  ·  OS stat  ·  source type ││  │
+│   │                     └────────────────────────────────────────────┘│  │
+│   └──────────────────────────────────────────────────────────────────┘  │
+│                               │                                          │
+│                    ┌──────────▼──────────┐                               │
+│                    │    ProgressBus       │                               │
+│                    │ (thread-safe pub/sub)│                               │
+│                    └──────────┬──────────┘                               │
+└───────────────────────────────┼──────────────────────────────────────────┘
+                                │  SQLite reads/writes
+                                ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                       Data Layer                                         │
+│                                                                          │
+│   ┌──────────────────────────────────────────────────────────────────┐  │
+│   │               DatabaseManager (SQLite WAL, thread-local pool)    │  │
+│   │                                                                  │  │
+│   │   images  ·  tags  ·  image_tags  ·  sources                    │  │
+│   │   ingestion_runs  ·  ml_results  ·  schema_migrations            │  │
+│   │                                                                  │  │
+│   │   ~/.temple_console/mission_controller.db  (default)             │  │
+│   └──────────────────────────────────────────────────────────────────┘  │
+│                               ▲                                          │
+│                    ┌──────────┴──────────┐                               │
+│                    │  MigrationEngine     │                               │
+│                    │  (schema versioning) │                               │
+│                    └─────────────────────┘                               │
+└──────────────────────────────────────────────────────────────────────────┘
+                                ▲
+                                │  filesystem scan
+┌──────────────────────────────────────────────────────────────────────────┐
+│                       File System                                        │
+│                                                                          │
+│   C:\Users\Games\Pictures\Starfield\   ← primary (auto-detected)        │
+│   Steam screenshots\                   ← auto-detected (app 1716740)    │
+│   Xbox Game Bar captures\              ← auto-detected                  │
+│   NVIDIA ShadowPlay\                   ← auto-detected                  │
+│   AMD ReLive\                          ← auto-detected                  │
+│   External drives (D:\, E:\, …)        ← opt-in only                   │
+│   User-specified extra paths           ← via CLI --path or Manage UI    │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 2. Module Responsibilities
+
+### `database/`
+
+| Module | Class / Function | Responsibility |
+|--------|-----------------|----------------|
+| `schema.py` | `DatabaseManager` | Thread-safe SQLite wrapper, WAL mode, FK enforcement, connection pool |
+| `schema.py` | `SCHEMA_DDL` | Full CREATE TABLE / INDEX / seed DDL (v1 baseline) |
+| `schema.py` | `get_db()` | Module-level singleton factory |
+| `migrations.py` | `MigrationEngine` | Forward-only migration runner, version tracking |
+| `migrations.py` | `MIGRATIONS` | Registry of (version, description, SQL) tuples |
+
+### `ingestion/`
+
+| Module | Class | Responsibility |
+|--------|-------|----------------|
+| `discovery.py` | `SourceDiscovery` | Auto-detect Steam/Xbox/NVIDIA/AMD + user paths; sync to DB |
+| `dedup.py` | `DedupEngine` | Two-stage dedup: SHA-256 exact + pHash near-duplicate |
+| `metadata.py` | `MetadataExtractor` | EXIF via Pillow, OS stat fallback, capture_source heuristic |
+| `ingestor.py` | `ImageIngestor` | Per-file pipeline: already-indexed? → dedup → extract → upsert |
+| `run_ingest.py` | `main()` | CLI entrypoint with banner, discovery, ingest loop, and report |
+
+### `classification/`
+
+| Module | Class | Responsibility |
+|--------|-------|----------------|
+| `base_classifier.py` | `BaseClassifier` | ABC defining `classify(path) → list[tuple[str, float]]` |
+| `scene_classifier.py` | `SceneClassifier` | tiered backend: fine-tuned → ImageNet zero-shot → OpenCV → stub |
+| `tag_manager.py` | `TagManager` | Tag vocabulary CRUD + image↔tag associations + bulk ML tagging |
+
+### `query/`
+
+| Module | Class | Responsibility |
+|--------|-------|----------------|
+| `api.py` | `QueryAPI` | High-level query interface; all methods return `ImageRecord` lists |
+| `api.py` | `ImageRecord` | DTO: id, file_path, file_name, size, dims, source, timestamps, tags |
+
+### `workers/`
+
+| Module | Class | Responsibility |
+|--------|-------|----------------|
+| `progress_bus.py` | `ProgressBus` | Thread-safe pub/sub event bus; no Qt dependency |
+| `progress_bus.py` | `ProgressEvent` | Event dataclass: type, current, total, message, data |
+| `batch_worker.py` | `BatchIngestionWorker` | Pure-Python daemon thread for batch ingestion + optional ML |
+| `batch_worker.py` | `QtBatchWorker` | QThread wrapper that bridges ProgressBus → Qt signals |
+
+### `ui/`
+
+| Module | Class | Responsibility |
+|--------|-------|----------------|
+| `mission_controller_widget.py` | `MissionControllerWidget` | Top-level tabbed widget — drop into any TempleConsole layout |
+| `mission_controller_widget.py` | `_ControlPanel` | Scan controls, source management, DB stats, migration runner |
+| `mission_controller_widget.py` | `_SourceDialog` | QDialog for managing extra source directories |
+| `browser_panel.py` | `ImageBrowserPanel` | Grid thumbnail view + detail panel; emits `image_selected` signal |
+| `tagging_panel.py` | `TaggingPanel` | Tag vocabulary browser + per-image tag editor |
+| `monitor_panel.py` | `MonitorPanel` | Real-time progress bar + live log + run statistics |
+
+### `utils/`
+
+| Module | Function | Responsibility |
+|--------|----------|----------------|
+| `checksums.py` | `compute_sha256()` | Streaming SHA-256 (1 MiB chunks) |
+| `checksums.py` | `compute_phash()` | Pure-Python DCT pHash (64-bit) with Pillow or stub |
+| `checksums.py` | `hamming_distance()` | Hex string Hamming distance for near-dedup |
+| `paths.py` | `walk_images()` | Recursive image file iterator (9 supported extensions) |
+| `paths.py` | `discover_steam_screenshots()` | Finds Steam userdata/…/1716740/screenshots/ |
+| `paths.py` | `discover_xbox/nvidia/amd_captures()` | Platform-aware well-known path discovery |
+| `logging_cfg.py` | `get_logger()` | Returns `[SIG-MC]`-prefixed logger under `mission_controller` root |
+
+---
+
+## 3. Data Flow — Single File Ingestion
+
+```
+  File on disk
+       │
+       ▼
+  ImageIngestor._process_one(path, source_id, stats)
+       │
+       ├─► Already in DB with same mtime? ──── YES ──► touch last_seen_at, return
+       │
+       ▼  NO
+  DedupEngine.check(path)
+       │
+       ├─► SHA-256 in images.sha256? ────────── YES ──► exact_dupes++, return
+       │
+       ▼  NO
+       ├─► pHash within Hamming 8? ──────────── YES ──► near_dupes++, is_duplicate=1
+       │
+       ▼
+  MetadataExtractor.extract(path)
+  (Pillow → EXIF, dimensions, format; OS stat → mtime, size; path heuristic → source)
+       │
+       ▼
+  DatabaseManager.execute(INSERT OR REPLACE INTO images …)
+  DedupEngine.register_phash(phash, image_id)
+       │
+       ├─► (optional) SceneClassifier.classify(path)
+       │              TagManager.bulk_apply_ml_tags(image_id, predictions)
+       │              INSERT INTO ml_results
+       │
+       ▼
+  ProgressBus.emit_new / emit_dupe / emit_error
+       │
+       ▼  (Qt bridge)
+  QtBatchWorker._on_event() ──► MonitorPanel Qt Slots (progress, new_image, etc.)
+```
+
+---
+
+## 4. Database Schema (v4)
+
+```sql
+images            — canonical image records
+  id              INTEGER PK AUTOINCREMENT
+  file_path       TEXT UNIQUE          -- absolute normalised path
+  sha256          TEXT UNIQUE          -- exact dedup key
+  phash           TEXT                 -- perceptual hash (near-dedup)
+  width / height  INTEGER
+  format          TEXT                 -- PNG / JPEG / WEBP …
+  capture_source  TEXT                 -- steam | xbox | nvidia | amd | manual
+  capture_ts      TEXT                 -- ISO-8601 (EXIF or mtime fallback)
+  file_mtime      TEXT NOT NULL        -- OS mtime
+  exif_json       TEXT                 -- raw EXIF as JSON blob
+  colour_palette  TEXT                 -- [migration v2] dominant colours
+  similarity_vec  BLOB                 -- [migration v3] embedding vector
+  user_notes      TEXT                 -- [migration v4] free-form notes
+  is_duplicate    INTEGER DEFAULT 0    -- 0=canonical, 1=duplicate
+  duplicate_of    INTEGER → images(id)
+  status          TEXT DEFAULT 'new'   -- new | indexed | classified | error
+  ingested_at     TEXT                 -- auto ISO-8601
+  last_seen_at    TEXT                 -- updated on every scan pass
+
+tags              — tag vocabulary (system + user + ml)
+image_tags        — many-to-many with confidence score and source
+sources           — watched directories/drives
+ingestion_runs    — audit log per scan
+ml_results        — raw model outputs per image
+schema_migrations — version history
+```
+
+---
+
+## 5. Threading Model
+
+```
+Main thread (Qt event loop)
+│
+├─ MissionControllerWidget + all UI panels
+├─ QueryAPI calls (short-lived DB reads; thread-local connection)
+│
+└─ QtBatchWorker.start() ──► spawns worker thread
+   │
+   └─ BatchIngestionWorker._run() [daemon thread]
+      │
+      ├─ DedupEngine, MetadataExtractor, ImageIngestor, SceneClassifier
+      ├─ All DB writes (thread-local connection per thread)
+      └─ ProgressBus.publish(event) ──► QtBatchWorker._on_event()
+                                              │
+                                         emits Qt signals (queued connections)
+                                              │
+                                    MonitorPanel / ControlPanel slots
+                                    (back on main thread — safe for UI updates)
+```
+
+**Safety rules:**
+- `DatabaseManager` uses `threading.local()` — each thread gets its own connection.
+- `ProgressBus` uses `threading.Lock()` around subscriber list.
+- Qt signals from worker thread → UI are automatically queued by Qt's event loop.
+- `stop_flag` is a single-element mutable list `[False]` — shared reference, no lock needed for a single bool.
+
+---
+
+## 6. ML Classification Pipeline
+
+```
+SceneClassifier.classify(path)
+       │
+       ├─ Backend == "torchvision_finetuned"
+       │     └─ Load weights → ResNet-50 custom head → softmax → top-K STARFIELD_LABELS
+       │
+       ├─ Backend == "torchvision_imagenet"
+       │     └─ ResNet-50 IMAGENET1K_V2 → top-5 ImageNet → _IMAGENET_HEURISTICS map
+       │           → STARFIELD_LABELS with scaled confidence
+       │
+       ├─ Backend == "opencv_histogram"
+       │     └─ HSV colour statistics → rule-based label assignment
+       │
+       └─ Backend == "stub"
+             └─ [("unknown", 0.0)]
+```
+
+**Adding your own model:**
+1. Subclass `BaseClassifier` in `classification/`.
+2. Implement `classify(path) → list[tuple[str, float]]`.
+3. Set `model_name` and `model_version`.
+4. Pass your classifier instance to `QtBatchWorker(classifier=my_clf)`.
+
+---
+
+## 7. Extension Points
+
+| What to add | Where to hook |
+|-------------|---------------|
+| Custom ML model | Subclass `BaseClassifier`; pass to `QtBatchWorker` |
+| Cloud sync | Wrap `DatabaseManager` with a sync layer; add `sources` type `cloud` |
+| New image metadata field | Add column to `images` via `MIGRATIONS` entry; update `MetadataExtractor` |
+| New query type | Add method to `QueryAPI`; call from any UI panel |
+| Additional UI panel | Create `QWidget` subclass; add tab to `MissionControllerWidget._build_ui()` |
+| Webhook / export | Subscribe to `ProgressBus`; emit on `EventType.COMPLETE` |
+
+---
+
+*SIG Mission Controller Architecture — "The index remembers every star you've ever crossed."*

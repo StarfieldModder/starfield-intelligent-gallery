@@ -1,0 +1,66 @@
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║   SIG Mission Controller  ·  setup.cfg                              ║
+# ║   Author  :  Mark J. Latsha  (StarfieldModder / Games)              ║
+# ║   Co-Auth :  Microsoft Copilot                                       ║
+# ║   Version :  1.0.0  —  2026.07.07                                    ║
+# ╚══════════════════════════════════════════════════════════════════════╝
+#
+# Install (editable, recommended during development):
+#   cd C:\SIG
+#   pip install -e .
+#
+# Install (regular):
+#   pip install .
+
+[metadata]
+name            = sig-mission-controller
+version         = 1.0.0
+author          = Mark J. Latsha (StarfieldModder / Games)
+author_email    = latsha2025@gmail.com
+description     = SIG Mission Controller — image ingestion, tagging, and query subsystem for TempleConsole
+long_description = file: mission_controller/README.md
+long_description_content_type = text/markdown
+license         = MIT
+keywords        = starfield, sig, mission-controller, image-gallery, pyside6
+classifiers     =
+    Development Status :: 4 - Beta
+    Intended Audience :: End Users/Desktop
+    License :: OSI Approved :: MIT License
+    Operating System :: OS Independent
+    Programming Language :: Python :: 3
+    Programming Language :: Python :: 3.10
+    Programming Language :: Python :: 3.11
+    Programming Language :: Python :: 3.12
+    Topic :: Games/Entertainment
+    Topic :: Multimedia :: Graphics
+
+[options]
+packages        = find:
+package_dir     =
+    = .
+python_requires = >=3.10
+install_requires =
+    PySide6>=6.5.0
+    Pillow>=10.0.0
+
+[options.packages.find]
+where = .
+include = mission_controller*
+
+[options.extras_require]
+ml =
+    torch>=2.0.0
+    torchvision>=0.15.0
+    opencv-python-headless>=4.8.0
+    imagehash>=4.3.1
+dev =
+    pytest>=7.0.0
+    pytest-cov
+
+[options.entry_points]
+console_scripts =
+    sig-ingest = mission_controller.ingestion.run_ingest:main
+
+[tool:pytest]
+testpaths = mission_controller/tests
+addopts   = -v --tb=short
