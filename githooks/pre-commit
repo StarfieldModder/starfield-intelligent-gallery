@@ -1,0 +1,17 @@
+#!/usr/bin/env pwsh
+# githooks/pre-commit
+# Warn if many files are staged for deletion
+
+$threshold = 10
+$deleted = git diff --cached --name-status | Select-String '^D' | Measure-Object | Select-Object -ExpandProperty Count
+
+if ($deleted -ge $threshold) {
+    Write-Host "WARNING: $deleted files are staged for deletion." -ForegroundColor Yellow
+    Write-Host "If this is intentional, type 'yes' to continue, otherwise press Enter to abort."
+    $answer = Read-Host "Proceed with commit?"
+    if ($answer -ne 'yes') {
+        Write-Host "Commit aborted by pre-commit hook." -ForegroundColor Red
+        exit 1
+    }
+}
+exit 0
