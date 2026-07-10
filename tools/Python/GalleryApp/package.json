@@ -1,0 +1,13 @@
+{
+  "name": "starfield-intelligent-gallery-ci-stub",
+  "version": "0.0.1",
+  "description": "Minimal Node.js stub for CI verification for the Starfield Intelligent Gallery project.",
+  "author": "Mark J. Latsha",
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "jest --runInBand"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
