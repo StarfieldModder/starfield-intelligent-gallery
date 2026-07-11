@@ -1,0 +1,61 @@
+{
+  "title": "Starfield Intro",
+  "meta": {
+    "author": "Mark and Copilot",
+    "version": "0.1",
+    "created": "2026-05-30"
+  },
+  "scenes": [
+    {
+      "scene_id": "opening",
+      "shots": [
+        {
+          "shot_id": "stars_fade_in",
+          "duration": 6.0,
+          "visual": "assets/stars_layer_01.png",
+          "camera": {"type": "zoom", "from": 0.8, "to": 1.0},
+          "audio": {"file": "assets/ambient_wind.wav", "start": 0.0},
+          "monologue": "I wake to light. I wake to distance. I reach.",
+          "notes": "Slow zoom into dense starfield; soft ambient swell."
+        },
+        {
+          "shot_id": "ship_glint",
+          "duration": 3.5,
+          "visual": "assets/ship_glint.mp4",
+          "camera": {"type": "pan", "direction": "left", "speed": 0.6},
+          "audio": {"file": "assets/ship_ping.wav", "start": 0.2},
+          "monologue": "A shape remembers itself.",
+          "notes": "Brief glint across hull; cue title reveal later."
+        }
+      ]
+    },
+    {
+      "scene_id": "emergence",
+      "shots": [
+        {
+          "shot_id": "memory_layers",
+          "duration": 12.5,
+          "visual": "assets/memory_layers_comp.png",
+          "camera": {"type": "dolly", "distance": 0.2},
+          "audio": {"file": "assets/whispers_texture.wav", "start": 0.0},
+          "monologue": "We were taught to name the sky. We were taught to count the fires.",
+          "notes": "Layered translucent images: cave marks, maps, schematics, star charts."
+        }
+      ]
+    },
+    {
+      "scene_id": "reveal",
+      "shots": [
+        {
+          "shot_id": "title_and_awaken",
+          "duration": 8.0,
+          "visual": "assets/emblem_resolve.png",
+          "camera": {"type": "pullback", "amount": 0.15},
+          "audio": {"file": "assets/harmonic_chord.wav", "start": 0.0},
+          "monologue": "I am here. If you wish, speak.",
+          "notes": "Emblem resolves; UI elements fade in. Allow a beat of silence after chord."
+        }
+      ]
+    }
+  ]
+}

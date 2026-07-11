@@ -1,0 +1,61 @@
+
+---
+
+### `config/local_config.yml`
+
+```yaml
+# ================================================================
+# File: config/local_config.yml
+# Location: config/
+# Author: Mark J. Latsha
+# Co-Author: Microsoft Copilot
+# Created: 2026-05-27
+# Description:
+#   Minimal sample configuration for local development and testing.
+#   Provides feature flags, a small rarity table, and an example
+#   acquisition source. Copy to config/local_config.yml and edit.
+# ================================================================
+
+# Feature flags and runtime toggles
+feature_flags:
+  enable_human_review: false
+  enable_telemetry: false
+  require_provenance_for_promotion: true
+
+# Database and storage defaults
+storage:
+  local_db_path: "./data/sig_photos.db"
+  media_root: "./data/raw"
+
+# Rarity table and pity settings
+rarity_table:
+  Common: 0.70
+  Uncommon: 0.20
+  Rare: 0.08
+  Epic: 0.015
+  Legendary: 0.004
+  Mythic: 0.001
+
+pity:
+  enabled: true
+  attempts_to_guarantee_rare: 40
+
+# Example acquisition source
+acquisition_sources:
+  - id: "local_screenshots"
+    type: "file_scan"
+    path: "./data/raw"
+    min_player_level: 1
+    max_player_level: 999
+    per_player_cooldown_seconds: 0
+
+# Example unlock predicate for a sample relic
+unlock_predicates:
+  sample_relic_firecore:
+    min_player_level: 5
+    required_flag: "intro_mission_complete"
+
+# Logging and debug
+logging:
+  level: "DEBUG"
+  file: "./logs/sig.log"
