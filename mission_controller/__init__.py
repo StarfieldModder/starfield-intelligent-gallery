@@ -54,3 +54,10 @@ def get_mission_director(db_client: Optional[Any] = None, worker_manager: Option
     if MissionDirector is None:
         raise ImportError("mission_controller.director is not available. Add director.py or the stub.")
     return MissionDirector(db_client=db_client, worker_manager=worker_manager)
+
+# mission_controller/__init__.py (add or update)
+try:
+    from .process import process_mission  # type: ignore
+except Exception:
+    def process_mission(*args, **kwargs):
+        raise ImportError("mission_controller.process.process_mission is not available in this environment")

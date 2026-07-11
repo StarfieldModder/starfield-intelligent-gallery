@@ -6,29 +6,25 @@ class IngestionError(Exception):
 
 def ingest_record(record: Dict[str, Any], storage_client: Optional[Any] = None, db_client: Optional[Any] = None) -> Dict[str, Any]:
     """
-    Minimal ingest_record stub for tests and local development.
-    Validates required fields, optionally uploads to storage_client, and inserts to db_client.
+    Minimal ingest_record for tests.
+    - Validates required fields.
+    - If storage_client provided, uploads (propagates storage exceptions).
+    - If db_client provided, inserts and returns inserted id (propagates db exceptions).
+    - On success returns a dict including 'id', 'name', and 'status' == 'ingested'.
     """
     if not isinstance(record, dict) or "name" not in record:
         raise ValueError("record must be a dict and include 'name'")
 
-    # simulate storage upload if provided
+    # storage upload (propagate exceptions so tests can observe them)
     if storage_client:
         key = f"obj-{record.get('name')}"
-        try:
-            if not storage_client.exists(key):
-                storage_client.upload(key, record.get("data", b""))
-        except Exception:
-            raise IngestionError("storage failure")
+        if not storage_client.exists(key):
+            storage_client.upload(key, record.get("data", b""))
 
-    # simulate DB insert if provided
+    # db insert (propagate exceptions)
+    inserted_id = None
     if db_client:
-        try:
-            res = db_client.insert({"name": record["name"], "metadata": record.get("metadata", {})})
-            inserted_id = res.get("id") if isinstance(res, dict) else res
-        except Exception:
-            raise IngestionError("db failure")
-    else:
-        inserted_id = "stub-id"
+        res = db_client.insert({"name": record["name"], "metadata": record.get("metadata", {})})
+        inserted_id = res.get("id") if isinstance(res, dict) else res
 
-    return {"status": "ingested", "id": inserted_id}
+    return {"id": inserted_id, "name": record["name"], "status": "ingested"}
