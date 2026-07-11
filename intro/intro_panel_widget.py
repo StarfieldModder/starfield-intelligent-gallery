@@ -110,3 +110,4 @@ class IntroPanel(QWidget):
         if state == MP.PlaybackState.StoppedState:
             if self._on_finished:
                 self._on_finished()
+

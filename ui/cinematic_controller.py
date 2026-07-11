@@ -44,6 +44,9 @@ from PySide6.QtGui     import (QColor, QFont, QKeySequence,
                                 QShortcut)
 from PySide6.QtWidgets import QApplication, QWidget
 
+def play_nebula_pebble_morph(self):
+    morph = NebulaPebbleMorph()
+    morph.run()
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Base overlay — shared by all five sequences

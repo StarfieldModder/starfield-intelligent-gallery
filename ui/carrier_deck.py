@@ -1,3 +1,4 @@
+# File: ui/carrier_deck.py
 # ================================================================
 # ╔══════════════════════════════════════════════════════════════╗
 # ║         C A R R I E R   D E C K                             ║
@@ -7,46 +8,25 @@
 # ║  Location  :  C:\SIG\ui\carrier_deck.py                      ║
 # ║  Author    :  Mark J. Latsha  (StarfieldModder / Games)      ║
 # ║  Co-Author :  Microsoft Copilot (AI Engineering Collaborator)║
-# ║  Version   :  2026.07.02 — Unicode-Safe Edition              ║
+# ║  Version   :  2026.07.11 — Pebble Morph to AncientFragment   ║
 # ╠══════════════════════════════════════════════════════════════╣
 # ║  WHAT THIS FILE IS                                           ║
 # ║                                                              ║
 # ║  The Carrier Deck — five sovereign panels that materialise   ║
 # ║  from particle clouds after The Crossing intro completes.    ║
 # ║                                                              ║
-# ║  Each panel begins as a swarm of scattered light-points.     ║
-# ║  Over ~1.8 seconds they condense, solidify, and glow —       ║
-# ║  like constellations forming from raw starlight.             ║
-# ║                                                              ║
-# ║  PANELS (left to right)                                      ║
-# ║    1  Journey       — Cobalt blue                            ║
-# ║    2  Archive       — Violet                                 ║
-# ║    3  Artifacts     — Gold                                   ║
-# ║    4  Companions    — Teal                                   ║
-# ║    5  Cosmic Choice — White-Silver  (rises 1.2 s last)       ║
-# ║                                                              ║
-# ║  SIGNALS                                                     ║
-# ║    CarrierDeck.panel_selected(int)  — 1..5                   ║
-# ║                                                              ║
-# ║  PUBLIC METHODS                                              ║
-# ║    begin_materialize()  — starts sequential panel appear     ║
-# ║    stop_all()           — stops all timers (on close)        ║
-# ║                                                              ║
-# ║  FIX LOG                                                     ║
-# ║  2026.07.02 — Header converted from triple-quote docstring   ║
-# ║               to # comments — eliminates unicode escape      ║
-# ║               SyntaxError on Python 3.13 (backslash in       ║
-# ║               Windows paths inside \"\"\" strings)           ║
+# ║  NOTE: Horizontal panels can be hidden and their color       ║
+# ║  palette transferred to compact "pebble" widgets which then  ║
+# ║  morph into AncientFragment objects for a seamless visual    ║
+# ║  transition into the fragment/coalescence system.            ║
 # ╚══════════════════════════════════════════════════════════════╝
-# ================================================================
-
 from __future__ import annotations
 
 import math
 import random
 import sys
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 from PySide6.QtCore    import (Property, QEasingCurve, QPointF,
                                 QPropertyAnimation, QRectF, Qt,
@@ -55,7 +35,7 @@ from PySide6.QtGui     import (QColor, QFont, QLinearGradient,
                                 QPainter, QPainterPath, QPen,
                                 QRadialGradient)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout,
-                                QSizePolicy, QVBoxLayout, QWidget)
+                                QSizePolicy, QVBoxLayout, QWidget, QLabel)
 
 # ActiveRandomNebula — graceful fallback if not yet present
 try:
@@ -65,94 +45,48 @@ except ImportError:
     _NEBULA_AVAILABLE = False
     print("[CarrierDeck]  ActiveRandomNebula not found — deck runs without nebula overlay.")
 
+# AncientFragment — used for morphing pebbles into fragments
+try:
+    from ui.ancient_fragment import AncientFragment
+    _ANCIENT_FRAGMENT_AVAILABLE = True
+except Exception:
+    _ANCIENT_FRAGMENT_AVAILABLE = False
+    print("[CarrierDeck]  AncientFragment not available — pebble morph will use labels fallback.")
 
-# ──────────────────────────────────────────────────────────────────────────────
-#  Panel definitions
-# ──────────────────────────────────────────────────────────────────────────────
 
 @dataclass
 class PanelDef:
     panel_id : int
     name     : str
     subtitle : str
-    color    : QColor       # dominant glow
-    accent   : QColor       # arc / border accent
-    delay_ms : int          # ms after begin_materialize() before this panel starts
+    color    : QColor
+    accent   : QColor
+    delay_ms : int
 
 
 PANEL_DEFS: List[PanelDef] = [
-    PanelDef(
-        panel_id = 1,
-        name     = "JOURNEY",
-        subtitle = "Exploration & Discovery",
-        color    = QColor(30,  90, 200),   # cobalt blue
-        accent   = QColor(80, 160, 255),
-        delay_ms = 0,
-    ),
-    PanelDef(
-        panel_id = 2,
-        name     = "ARCHIVE",
-        subtitle = "Memory & Knowledge",
-        color    = QColor(110, 30, 180),   # violet
-        accent   = QColor(180, 80, 255),
-        delay_ms = 300,
-    ),
-    PanelDef(
-        panel_id = 3,
-        name     = "ARTIFACTS",
-        subtitle = "Relics & Revelation",
-        color    = QColor(180, 130,  20),  # gold
-        accent   = QColor(255, 200,  60),
-        delay_ms = 600,
-    ),
-    PanelDef(
-        panel_id = 4,
-        name     = "COMPANIONS",
-        subtitle = "Relationships & Crew",
-        color    = QColor(20, 140, 140),   # teal
-        accent   = QColor(60, 220, 220),
-        delay_ms = 900,
-    ),
-    PanelDef(
-        panel_id = 5,
-        name     = "COSMIC CHOICE",
-        subtitle = "The Threshold Awaits",
-        color    = QColor(160, 175, 200),  # white-silver
-        accent   = QColor(220, 230, 255),
-        delay_ms = 1200,                   # rises last
-    ),
+    PanelDef(1, "JOURNEY", "Exploration & Discovery", QColor(30,90,200), QColor(80,160,255), 0),
+    PanelDef(2, "ARCHIVE", "Memory & Knowledge", QColor(110,30,180), QColor(180,80,255), 300),
+    PanelDef(3, "ARTIFACTS", "Relics & Revelation", QColor(180,130,20), QColor(255,200,60), 600),
+    PanelDef(4, "COMPANIONS", "Relationships & Crew", QColor(20,140,140), QColor(60,220,220), 900),
+    PanelDef(5, "COSMIC CHOICE", "The Threshold Awaits", QColor(160,175,200), QColor(220,230,255), 1200),
 ]
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-#  Particle  (internal data class)
-# ──────────────────────────────────────────────────────────────────────────────
 
 @dataclass
 class Particle:
     x   : float
     y   : float
-    tx  : float   # target x (inside panel bounds)
-    ty  : float   # target y (inside panel bounds)
+    tx  : float
+    ty  : float
     vx  : float = field(default=0.0)
     vy  : float = field(default=0.0)
-    age : float = field(default=0.0)    # 0..1 (0=born, 1=arrived)
-    r   : float = field(default=2.0)    # radius
+    age : float = field(default=0.0)
+    r   : float = field(default=2.0)
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-#  CelestialPanel
-# ──────────────────────────────────────────────────────────────────────────────
 
 class CelestialPanel(QWidget):
-    """
-    One of the five sovereign panels.
-    Materialises from a particle cloud, then breathes and glows.
-    """
-
-    clicked = Signal(int)    # emits panel_id when user clicks
-
-    # Animation phases
+    clicked = Signal(int)
     _PHASE_IDLE      = 0
     _PHASE_PARTICLES = 1
     _PHASE_SOLIDIFY  = 2
@@ -161,43 +95,36 @@ class CelestialPanel(QWidget):
     _PARTICLE_COUNT  = 80
     _PARTICLE_FPS    = 40
     _SOLIDIFY_MS     = 1_800
-    _BREATH_PERIOD   = 3_000   # ms for one full breath cycle
+    _BREATH_PERIOD   = 3_000
 
     def __init__(self, defn: PanelDef, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._defn      = defn
         self._phase     = self._PHASE_IDLE
         self._particles : List[Particle] = []
-        self._opacity   = 0.0         # 0..1 solid panel opacity
-        self._breath    = 0.0         # 0..1 breath sine value
+        self._opacity   = 0.0
+        self._breath    = 0.0
         self._hovered   = False
-        self._arc_angle = 0.0         # rotating arc decoration
+        self._arc_angle = 0.0
 
         self.setMinimumSize(200, 380)
-        self.setSizePolicy(QSizePolicy.Policy.Expanding,
-                           QSizePolicy.Policy.Expanding)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setMouseTracking(True)
 
-        # Particle / breath timer
         self._timer = QTimer(self)
         self._timer.setInterval(1000 // self._PARTICLE_FPS)
         self._timer.timeout.connect(self._tick)
 
-        # Solidify timer
         self._solidify_timer = QTimer(self)
         self._solidify_timer.setInterval(16)
         self._solidify_elapsed = 0
         self._solidify_timer.timeout.connect(self._solidify_tick)
 
-        # Breath timer (fires only in ALIVE phase)
         self._breath_elapsed = random.randint(0, self._BREATH_PERIOD)
 
-    # ── Public ────────────────────────────────────────────────────────────────
-
     def start_materialize(self) -> None:
-        """Kick off the particle cloud → solid panel animation."""
         self._phase = self._PHASE_PARTICLES
         self._spawn_particles()
         self._timer.start()
@@ -205,8 +132,6 @@ class CelestialPanel(QWidget):
     def stop(self) -> None:
         self._timer.stop()
         self._solidify_timer.stop()
-
-    # ── Internal animation ────────────────────────────────────────────────────
 
     def _spawn_particles(self) -> None:
         w, h = self.width(), self.height()
@@ -225,12 +150,10 @@ class CelestialPanel(QWidget):
 
     def _tick(self) -> None:
         dt = 1.0 / self._PARTICLE_FPS
-
         if self._phase == self._PHASE_PARTICLES:
             done = True
             for p in self._particles:
                 p.age = min(1.0, p.age + dt / 1.2)
-                ease = p.age * p.age * (3.0 - 2.0 * p.age)   # smoothstep
                 p.x = p.x + (p.tx - p.x) * 0.06
                 p.y = p.y + (p.ty - p.y) * 0.06
                 if abs(p.x - p.tx) > 2 or abs(p.y - p.ty) > 2:
@@ -239,13 +162,11 @@ class CelestialPanel(QWidget):
                 self._phase = self._PHASE_SOLIDIFY
                 self._solidify_elapsed = 0
                 self._solidify_timer.start()
-
         elif self._phase == self._PHASE_ALIVE:
             self._breath_elapsed += 1000 / self._PARTICLE_FPS
             t = (self._breath_elapsed % self._BREATH_PERIOD) / self._BREATH_PERIOD
             self._breath = (math.sin(2 * math.pi * t) + 1) / 2
             self._arc_angle = (self._arc_angle + 0.3) % 360
-
         self.update()
 
     def _solidify_tick(self) -> None:
@@ -256,23 +177,16 @@ class CelestialPanel(QWidget):
             self._phase = self._PHASE_ALIVE
         self.update()
 
-    # ── Paint ─────────────────────────────────────────────────────────────────
-
     def paintEvent(self, event) -> None:
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         w, h = self.width(), self.height()
-
-        # Draw particles
         if self._phase in (self._PHASE_PARTICLES, self._PHASE_SOLIDIFY):
             self._draw_particles(p, w, h)
-
-        # Draw solid panel (fades in during SOLIDIFY, full in ALIVE)
         if self._phase in (self._PHASE_SOLIDIFY, self._PHASE_ALIVE):
             p.setOpacity(self._opacity)
             self._draw_panel(p, w, h)
             p.setOpacity(1.0)
-
         p.end()
 
     def _draw_particles(self, p: QPainter, w: int, h: int) -> None:
@@ -290,8 +204,6 @@ class CelestialPanel(QWidget):
         rect  = QRectF(8, 8, w - 16, h - 16)
         hover_boost = 0.25 if self._hovered else 0.0
         breath_val  = self._breath * 0.12 + hover_boost
-
-        # Background gradient
         grad = QLinearGradient(0, 0, 0, h)
         grad.setColorAt(0.0, QColor(c.red(), c.green(), c.blue(), int(60  + breath_val * 60)))
         grad.setColorAt(0.5, QColor(c.red(), c.green(), c.blue(), int(30  + breath_val * 30)))
@@ -299,22 +211,16 @@ class CelestialPanel(QWidget):
         p.setBrush(grad)
         p.setPen(Qt.PenStyle.NoPen)
         p.drawRoundedRect(rect, 12, 12)
-
-        # Border glow
         glow_alpha = int(160 + breath_val * 95)
         pen = QPen(QColor(acc.red(), acc.green(), acc.blue(), glow_alpha), 2.0)
         p.setPen(pen)
         p.setBrush(Qt.BrushStyle.NoBrush)
         p.drawRoundedRect(rect, 12, 12)
-
-        # Rotating arc decoration (top-right corner)
         arc_rect = QRectF(w - 56, 12, 44, 44)
         arc_pen  = QPen(QColor(acc.red(), acc.green(), acc.blue(), 100), 1.5)
         arc_pen.setStyle(Qt.PenStyle.DashLine)
         p.setPen(arc_pen)
         p.drawArc(arc_rect, int(self._arc_angle * 16), 240 * 16)
-
-        # Panel name
         name_font = QFont("Segoe UI", 14, QFont.Weight.Bold)
         name_font.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 3)
         p.setFont(name_font)
@@ -322,8 +228,6 @@ class CelestialPanel(QWidget):
         p.drawText(QRectF(16, h * 0.48, w - 32, 32),
                    Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter,
                    self._defn.name)
-
-        # Subtitle
         sub_font = QFont("Segoe UI", 9, QFont.Weight.Thin)
         sub_font.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 1)
         p.setFont(sub_font)
@@ -331,8 +235,6 @@ class CelestialPanel(QWidget):
         p.drawText(QRectF(16, h * 0.58, w - 32, 28),
                    Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter,
                    self._defn.subtitle)
-
-        # Central dot — pulse with breath
         cx, cy = w / 2, h * 0.36
         dot_r  = 5 + self._breath * 3
         grad2  = QRadialGradient(cx, cy, dot_r * 2)
@@ -341,16 +243,12 @@ class CelestialPanel(QWidget):
         p.setBrush(grad2)
         p.setPen(Qt.PenStyle.NoPen)
         p.drawEllipse(QPointF(cx, cy), dot_r * 2, dot_r * 2)
-
-        # Halo rings (two concentric, faint)
         for ring_r in (20, 35):
             ring_alpha = int((0.15 + self._breath * 0.1) * 255)
             ring_pen = QPen(QColor(acc.red(), acc.green(), acc.blue(), ring_alpha), 1)
             p.setPen(ring_pen)
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawEllipse(QPointF(cx, cy), ring_r, ring_r)
-
-    # ── Mouse events ──────────────────────────────────────────────────────────
 
     def enterEvent(self, event) -> None:
         self._hovered = True
@@ -361,56 +259,34 @@ class CelestialPanel(QWidget):
         self.update()
 
     def mousePressEvent(self, event) -> None:
-        if (event.button() == Qt.MouseButton.LeftButton
-                and self._phase == self._PHASE_ALIVE):
+        if (event.button() == Qt.MouseButton.LeftButton and self._phase == self._PHASE_ALIVE):
             self.clicked.emit(self._defn.panel_id)
         super().mousePressEvent(event)
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-#  CarrierDeck
-# ──────────────────────────────────────────────────────────────────────────────
-
 class CarrierDeck(QWidget):
-    """
-    The five-panel sovereign command deck.
-
-    Usage
-    ─────
-    deck = CarrierDeck(parent=self)
-    deck.panel_selected.connect(self._on_panel_selected)
-    deck.begin_materialize()   # called by MainWindow after intro
-    """
-
-    panel_selected = Signal(int)   # 1..5
+    panel_selected = Signal(int)
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setStyleSheet("background-color: #080a12;")
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
-        # ── Ambient star-dust field (120 points) ──────────────────────────
-        self._stars: list[tuple[float, float, float]] = []   # x, y, r
+        self._stars: list[tuple[float, float, float]] = []
         self._stars_seeded = False
 
-        # ── Layout ────────────────────────────────────────────────────────
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(0)
-
-        # Top spacer
         outer.addStretch(1)
 
-        # Panel row
         panel_row = QHBoxLayout()
         panel_row.setContentsMargins(40, 0, 40, 0)
         panel_row.setSpacing(18)
         outer.addLayout(panel_row, stretch=8)
-
-        # Bottom spacer
+        self._panel_row = panel_row
         outer.addStretch(1)
 
-        # ── Create five panels ────────────────────────────────────────────
         self._panels: List[CelestialPanel] = []
         for defn in PANEL_DEFS:
             panel = CelestialPanel(defn, parent=self)
@@ -418,7 +294,6 @@ class CarrierDeck(QWidget):
             self._panels.append(panel)
             panel_row.addWidget(panel)
 
-        # ── Nebula overlay (behind panels, transparent to mouse) ──────────
         if _NEBULA_AVAILABLE:
             self._nebula = ActiveRandomNebula(parent=self, density=7)
             self._nebula.lower()
@@ -426,22 +301,84 @@ class CarrierDeck(QWidget):
         else:
             self._nebula = None
 
-        # ── Ambient star timer ────────────────────────────────────────────
         self._star_timer = QTimer(self)
         self._star_timer.setInterval(50)
         self._star_timer.timeout.connect(self.update)
         self._star_timer.start()
 
-        # ── Materialize timers (one per panel) ────────────────────────────
         self._mat_timers: List[QTimer] = []
+        self._pebbles: List[QWidget] = []
+        self._pebble_targets: List[tuple[float, float]] = []
+        self._pebble_starts: List[tuple[float, float]] = []
+        self._pebble_anim_timer: Optional[QTimer] = None
 
-    # ── Public API ────────────────────────────────────────────────────────────
+        # When pebbles morph, we keep AncientFragment instances here
+        self._pebble_fragments: List[AncientFragment] = [] if _ANCIENT_FRAGMENT_AVAILABLE else []
 
-    def begin_materialize(self) -> None:
-        """
-        Fire each panel's materialise animation with its configured delay.
-        Called by MainWindow._on_intro_finished() (via QTimer.singleShot).
-        """
+        # Fallback labels if AncientFragment isn't available
+        self._coalesce_labels: List[QLabel] = []
+
+    def begin_materialize(self, use_pebbles: bool = True) -> None:
+        if use_pebbles:
+            for panel in self._panels:
+                try:
+                    panel.hide()
+                except Exception:
+                    pass
+
+            # create pebbles and add to layout
+            for i, defn in enumerate(PANEL_DEFS):
+                peb = QWidget(self)
+                peb.setFixedSize(28, 28)
+                cr, cg, cb = defn.color.red(), defn.color.green(), defn.color.blue()
+                peb.setStyleSheet(
+                    f"background-color: rgba({cr},{cg},{cb},255); border-radius: 14px; border: 1px solid rgba(255,255,255,30);"
+                )
+                peb.hide()
+                self._pebbles.append(peb)
+                self._panel_row.addWidget(peb)
+
+            # compute start/target positions
+            w = self.width()
+            h = self.height()
+            left = 80
+            right = max(300, w - 80)
+            span = right - left
+            for i in range(len(self._pebbles)):
+                tx = left + (i + 0.5) * (span / len(self._pebbles))
+                ty = int(h * 0.52)
+                self._pebble_targets.append((tx, ty))
+
+            rng = random.Random(42)
+            for i in range(len(self._pebbles)):
+                side = rng.randint(0, 3)
+                if side == 0:
+                    sx, sy = rng.uniform(0, w), -80 - rng.uniform(0, 160)
+                elif side == 1:
+                    sx, sy = rng.uniform(0, w), h + 80 + rng.uniform(0, 160)
+                elif side == 2:
+                    sx, sy = -80 - rng.uniform(0, 160), rng.uniform(0, h)
+                else:
+                    sx, sy = w + 80 + rng.uniform(0, 160), rng.uniform(0, h)
+                self._pebble_starts.append((sx, sy))
+
+            # place pebbles at starts and show
+            for i, peb in enumerate(self._pebbles):
+                sx, sy = self._pebble_starts[i]
+                peb.move(int(sx), int(sy))
+                peb.show()
+
+            # animate into place over 1.2s
+            self._pebble_anim_t = 0.0
+            self._pebble_anim_dur = 1.2
+            self._pebble_anim_timer = QTimer(self)
+            self._pebble_anim_timer.setInterval(16)
+            self._pebble_anim_timer.timeout.connect(self._pebble_anim_tick)
+            self._pebble_anim_timer.start()
+            print("[CarrierDeck] pebbles created and animating into place.")
+            return
+
+        # fallback: original panel materialization
         for panel in self._panels:
             t = QTimer(self)
             t.setSingleShot(True)
@@ -450,8 +387,141 @@ class CarrierDeck(QWidget):
             t.start()
             self._mat_timers.append(t)
 
+    def _pebble_anim_tick(self) -> None:
+        try:
+            self._pebble_anim_t += 0.016
+            t = min(1.0, self._pebble_anim_t / self._pebble_anim_dur)
+            ease = 1.0 - (1.0 - t) ** 3.0
+            for i, peb in enumerate(self._pebbles):
+                sx, sy = self._pebble_starts[i]
+                tx, ty = self._pebble_targets[i]
+                nx = sx + (tx - sx) * ease
+                ny = sy + (ty - sy) * ease
+                peb.move(int(nx - peb.width() / 2), int(ny - peb.height() / 2))
+            if t >= 1.0:
+                if self._pebble_anim_timer:
+                    self._pebble_anim_timer.stop()
+                print("[CarrierDeck] pebbles settled — morphing into fragments.")
+                QTimer.singleShot(180, self._morph_pebbles_to_fragments)
+        except Exception as exc:
+            print(f"[CarrierDeck] pebble animation tick failed: {exc}")
+
+    def _morph_pebbles_to_fragments(self) -> None:
+        """
+        Replace the visual pebble widgets with AncientFragment objects
+        positioned at the pebble targets. If AncientFragment is not
+        available, fall back to the coalescence label sequence.
+        """
+        try:
+            if _ANCIENT_FRAGMENT_AVAILABLE:
+                # create AncientFragment objects using panel names
+                for i, defn in enumerate(PANEL_DEFS):
+                    tx, ty = self._pebble_targets[i]
+                    # Use the panel name as the fragment 'word' for visual continuity
+                    frag = AncientFragment(defn.name, i, seed=i * 997 + 42)
+                    # Place fragment exactly at the pebble target (spawn==target)
+                    frag.place(tx, ty, tx, ty)
+                    # Immediately settle / lock the fragment visually
+                    try:
+                        frag.begin_orbit()
+                    except Exception:
+                        # If begin_orbit not appropriate, set state to SETTLED defensively
+                        try:
+                            frag.state = AncientFragment.SETTLED
+                        except Exception:
+                            pass
+                    # Keep a reference so GC doesn't collect it
+                    self._pebble_fragments.append(frag)
+
+                # remove pebble widgets from layout and hide them
+                for peb in self._pebbles:
+                    try:
+                        peb.hide()
+                        peb.setParent(None)
+                    except Exception:
+                        pass
+                self._pebbles.clear()
+                print("[CarrierDeck] pebbles morphed into AncientFragment objects.")
+                # Trigger a short coalescence inscription sequence if desired
+                QTimer.singleShot(300, self._trigger_fragment_inscription)
+            else:
+                # Fallback: run the label coalescence sequence
+                print("[CarrierDeck] AncientFragment unavailable — running label coalescence fallback.")
+                self._start_coalesce_sequence()
+        except Exception as exc:
+            print(f"[CarrierDeck] morphing pebbles failed: {exc}")
+            # fallback to labels
+            self._start_coalesce_sequence()
+
+    def _trigger_fragment_inscription(self) -> None:
+        """
+        If fragments exist, nudge them to show a short inscription animation.
+        We keep this minimal: set inscription progress to 1.0 over a short time
+        so the visual reads as 'coalesced'.
+        """
+        try:
+            if not self._pebble_fragments:
+                return
+            # Step each fragment's inscription in a staggered fashion
+            for i, frag in enumerate(self._pebble_fragments):
+                QTimer.singleShot(120 * i, lambda frag=frag: self._set_fragment_inscription(frag))
+            QTimer.singleShot(120 * len(self._pebble_fragments) + 400, lambda: print("[CarrierDeck] fragment inscription complete."))
+        except Exception as exc:
+            print(f"[CarrierDeck] trigger_fragment_inscription failed: {exc}")
+
+    def _set_fragment_inscription(self, frag: AncientFragment) -> None:
+        try:
+            # Best-effort: set inscription to fully visible
+            try:
+                frag.inscription = 1.0
+            except Exception:
+                # If direct property not available, attempt a method if present
+                if hasattr(frag, "set_inscription"):
+                    try:
+                        frag.set_inscription(1.0)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+    def _start_coalesce_sequence(self) -> None:
+        try:
+            # create labels for each word fragment and fade them in sequentially
+            self._coalesce_labels = []
+            w, h = self.width(), self.height()
+            rng = random.Random(1234)
+            total = len(PANEL_DEFS)
+            for i, defn in enumerate(PANEL_DEFS):
+                lbl = QLabel(defn.name, self)
+                font = QFont("Segoe UI", 28, QFont.Weight.Bold)
+                lbl.setFont(font)
+                lbl.setStyleSheet("color: rgba(255, 220, 140, 0); background: transparent;")
+                x = w * 0.18 + i * (w * 0.64 / max(1, total - 1)) + rng.uniform(-8, 8)
+                y = h * 0.62 + rng.uniform(-6, 6)
+                lbl.move(int(x), int(y))
+                lbl.adjustSize()
+                lbl.show()
+                self._coalesce_labels.append(lbl)
+            for i, lbl in enumerate(self._coalesce_labels):
+                QTimer.singleShot(160 * i, lambda lbl=lbl: self._fade_in_label(lbl))
+            QTimer.singleShot(160 * len(self._coalesce_labels) + 600, lambda: print("[CarrierDeck] coalescence complete."))
+        except Exception as exc:
+            print(f"[CarrierDeck] coalesce sequence failed: {exc}")
+
+    def _fade_in_label(self, lbl: QLabel) -> None:
+        try:
+            steps = 12
+            step_ms = 28
+            def step(i=0):
+                a = int(220 * (i / steps))
+                lbl.setStyleSheet(f"color: rgba(255, 220, 140, {a}); background: transparent;")
+                if i < steps:
+                    QTimer.singleShot(step_ms, lambda i=i+1: step(i))
+            step(0)
+        except Exception as exc:
+            print(f"[CarrierDeck] fade_in_label failed: {exc}")
+
     def stop_all(self) -> None:
-        """Stop all running timers. Called from MainWindow.closeEvent."""
         for t in self._mat_timers:
             t.stop()
         for panel in self._panels:
@@ -463,12 +533,8 @@ class CarrierDeck(QWidget):
             except AttributeError:
                 pass
 
-    # ── Slots ─────────────────────────────────────────────────────────────────
-
     def _on_panel_clicked(self, panel_id: int) -> None:
         print(f"[CarrierDeck]  Panel {panel_id} selected.")
-
-          # Whisper to the Throne (if present)
         parent = self.parent()
         if parent is not None and hasattr(parent, "speak_to_throne"):
             try:
@@ -477,10 +543,7 @@ class CarrierDeck(QWidget):
                 print(f"[CarrierDeck] whisper (fallback): sovereign {panel_id} stepped forward.")
         else:
             print(f"[CarrierDeck] whisper: sovereign {panel_id} stepped forward.")
-
         self.panel_selected.emit(panel_id)
-
-    # ── Paint (ambient star-dust) ─────────────────────────────────────────────
 
     def paintEvent(self, event) -> None:
         if not self._stars_seeded:
@@ -493,6 +556,21 @@ class CarrierDeck(QWidget):
             p.setBrush(QColor(200, 215, 255, alpha))
             p.setPen(Qt.PenStyle.NoPen)
             p.drawEllipse(QPointF(sx, sy), sr, sr)
+
+        # If we have AncientFragment objects created from pebbles, draw them
+        if _ANCIENT_FRAGMENT_AVAILABLE and self._pebble_fragments:
+            try:
+                # Use a simple time value for fragment draw calls
+                t = 0.0
+                for frag in self._pebble_fragments:
+                    try:
+                        frag.draw(p, t)
+                    except Exception:
+                        # If draw signature differs, ignore and continue
+                        pass
+            except Exception:
+                pass
+
         p.end()
 
     def _seed_stars(self) -> None:
@@ -506,37 +584,24 @@ class CarrierDeck(QWidget):
         self._stars_seeded = True
 
     def resizeEvent(self, event) -> None:
-        self._stars_seeded = False   # re-seed on resize
+        self._stars_seeded = False
         if self._nebula:
             self._nebula.resize(self.size())
         super().resizeEvent(event)
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-#  Standalone test  —  python ui\carrier_deck.py
-# ──────────────────────────────────────────────────────────────────────────────
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setApplicationName("SIG — Carrier Deck")
-
     win = QWidget()
     win.setWindowTitle("Starfield Intelligent Gallery — Carrier Deck Test")
     win.resize(1280, 720)
     win.setStyleSheet("background-color: #080a12;")
-
     layout = QVBoxLayout(win)
     layout.setContentsMargins(0, 0, 0, 0)
-
     deck = CarrierDeck(win)
-    deck.panel_selected.connect(
-        lambda pid: print(f"[TEST] Panel {pid} selected!")
-    )
+    deck.panel_selected.connect(lambda pid: print(f"[TEST] Panel {pid} selected!"))
     layout.addWidget(deck)
-
     win.show()
-
-    # Start materialisation after 500 ms
-    QTimer.singleShot(500, deck.begin_materialize)
-
+    QTimer.singleShot(500, lambda: deck.begin_materialize(use_pebbles=True))
     sys.exit(app.exec())

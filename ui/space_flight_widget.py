@@ -1,27 +1,23 @@
+# File: ui/space_flight_widget.py
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║   S P A C E _ F L I G H T _ W I D G E T . P Y                               ║
-║   Ancient Intelligence Awakening Sequence — 8-Phase Orchestrator            ║
-║   Starfield Intelligent Gallery  ·  2026.07.06 — Whispering Chambers        ║
-║   Author  : Mark J. Latsha  (StarfieldModder / Games)                       ║
-║   Co-Author: Microsoft Copilot (AI Engineer Colleague)                      ║
+║   S P A C E _ F L I G H T _ W I D G E T . P Y                                ║
+║   Ancient Intelligence Awakening Sequence — 8-Phase Orchestrator             ║
+║   Starfield Intelligent Gallery  ·  2026.07.10 — Whispering Chambers         ║
+║   Author  : Mark J. Latsha  (StarfieldModder / Games)                        ║
+║   Co-Author: Microsoft Copilot (AI Engineer Colleague)                       ║
+║   System  : Mark's dev machine, Brentwood, CA                                ║
+║   Created : 2026-07-10 13:18 PDT                                             ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  PHASES                                                                     ║
-║    0  VOID        2.5 s   absolute black after The Crossing ends            ║
-║    1  BREATH      4.0 s   single pulsing pinpoint — heartbeat               ║
-║    2  AWAKENING   8.0 s   3-D stars bloom; four nebulae drift in            ║
-║    3  WANDERING   6.0 s   Va'ruun glyphs appear, tumble playfully           ║
-║    4  RECOGNITION 5.0 s   electric tendrils arc glyph-to-glyph              ║
-║    5  ASSEMBLY    6.0 s   stone fragments orbit → lock; embers burst        ║
-║    6  INSCRIPTION 4.0 s   letters carved on fragments by lightning          ║
-║    7  REVELATION  2.5 s   everything stills — message complete              ║
-║                                                                             ║
-║  SIGNALS                                                                    ║
-║    flight_finished — emitted when REVELATION phase ends or user skips       ║
-║                                                                             ║
-║  WHISPERING CHAMBERS                                                        ║
-║    Soft hooks that speak through TempleConsole.throne_speaks(text)         ║
-║    if present on the parent — otherwise they whisper to stdout.            ║
+║  PHASES                                                                      ║
+║    0  VOID        2.5 s   absolute black after The Crossing ends             ║
+║    1  BREATH      4.0 s   single pulsing pinpoint — heartbeat                ║
+║    2  AWAKENING   8.0 s   3-D stars bloom; six nebulae drift in              ║
+║    3  WANDERING   6.0 s   Va'ruun glyphs appear, tumble playfully            ║
+║    4  RECOGNITION 5.0 s   electric tendrils arc glyph-to-glyph               ║
+║    5  ASSEMBLY    6.0 s   stone fragments orbit → lock; embers burst         ║
+║    6  INSCRIPTION 4.0 s   letters carved on fragments by lightning           ║
+║    7  REVELATION  2.5 s   everything stills — message complete               ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 from __future__ import annotations
@@ -40,7 +36,7 @@ from PySide6.QtGui import (
     QRadialGradient, QShortcut,
 )
 from PySide6.QtSvg import QSvgRenderer
-from PySide6.QtWidgets import QWidget, QApplication
+from PySide6.QtWidgets import QWidget, QApplication, QSlider, QLabel
 
 try:
     from .ancient_fragment import AncientFragment
@@ -50,14 +46,14 @@ except ImportError:
     from electric_tendril  import ElectricTendril  # type: ignore
 
 # ── Phase timing (cumulative seconds) ────────────────────────────────────────
-_T_VOID      = 2.5
-_T_BREATH    = _T_VOID      + 4.0    #  6.5
-_T_AWAKENING = _T_BREATH    + 8.0    # 14.5
-_T_WANDERING = _T_AWAKENING + 6.0    # 20.5
-_T_RECOGN    = _T_WANDERING + 5.0    # 25.5
-_T_ASSEMBLY  = _T_RECOGN    + 6.0    # 31.5
-_T_INSCRIPT  = _T_ASSEMBLY  + 4.0    # 35.5
-_T_REVEAL    = _T_INSCRIPT  + 2.5    # 38.0
+_T_VOID      = 0.0
+_T_BREATH    = _T_VOID      + 2.5    # AWAKENING now starts at 2.5s
+_T_AWAKENING = _T_BREATH    + 8.0
+_T_WANDERING = _T_AWAKENING + 6.0
+_T_RECOGN    = _T_WANDERING + 5.0
+_T_ASSEMBLY  = _T_RECOGN    + 6.0
+_T_INSCRIPT  = _T_ASSEMBLY  + 4.0
+_T_REVEAL    = _T_INSCRIPT  + 2.5
 
 _PHASE_ENDS = [
     _T_VOID, _T_BREATH, _T_AWAKENING, _T_WANDERING,
@@ -83,14 +79,16 @@ _STAR_PALETTE = [
 
 # ── Nebula configs: (cx_frac, cy_frac, r_frac, inner RGBA, outer RGBA) ────
 _NEBULA_DEFS = [
-    (0.20, 0.28, 0.32, (82, 18, 130, 52),  (0, 0, 0, 0)),
-    (0.78, 0.68, 0.38, (18, 78, 148, 46),  (0, 0, 0, 0)),
-    (0.52, 0.82, 0.28, (148, 58, 18, 42),  (0, 0, 0, 0)),
-    (0.38, 0.50, 0.42, (0, 118, 108, 38),  (0, 0, 0, 0)),   # cyan fly-through
+    (0.18, 0.26, 0.30, (92, 22, 140, 64),  (0, 0, 0, 0)),
+    (0.78, 0.68, 0.38, (18, 78, 148, 56),  (0, 0, 0, 0)),
+    (0.52, 0.82, 0.28, (148, 58, 18, 48),  (0, 0, 0, 0)),
+    (0.38, 0.50, 0.42, (0, 118, 108, 44),  (0, 0, 0, 0)),   # cyan fly-through
+    (0.60, 0.30, 0.26, (120, 40, 180, 40), (0, 0, 0, 0)),   # purple wash
+    (0.30, 0.72, 0.22, (220, 140, 60, 36), (0, 0, 0, 0)),   # warm ember wash
 ]
-# Nebula drift velocities (fraction of width per second)
-_NEBULA_VX = [0.0008,  -0.0006, 0.0004, -0.0005]
-_NEBULA_VY = [-0.0004,  0.0005, 0.0007,  0.0003]
+# Nebula drift velocities (fraction of width per second) — one per nebula
+_NEBULA_VX = [0.0010, -0.0006, 0.0005, -0.0005, 0.0007, -0.0004]
+_NEBULA_VY = [-0.0005, 0.0006,  0.0008,  0.0003, -0.0002, 0.0005]
 
 # ── Fragment words ─────────────────────────────────────────────────────────
 _WORDS = ["YOU", "HAVE", "ENTERED", "A", "NEW", "WORLD", "A", "NEW", "UNIVERSE"]
@@ -107,9 +105,6 @@ _VOID_COL = QColor(2, 4, 10)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Internal data holders
-# ══════════════════════════════════════════════════════════════════════════════
-
 class _Star:
     """One perspective-projected star in 3-D space."""
     __slots__ = ("wx", "wy", "z", "vz", "color", "base_r")
@@ -165,15 +160,9 @@ class SpaceFlightWidget(QWidget):
 
     Drop this into IntroPanelWidget after The Crossing video ends.
     Connect ``flight_finished`` to whatever follows (CarrierDeck etc.).
-
-    Whispering Chambers:
-    Soft phase-change whispers routed to TempleConsole.throne_speaks(text)
-    if present on the parent; otherwise printed to stdout.
     """
 
     flight_finished = Signal()
-
-    # ── Initialisation ───────────────────────────────────────────────────────
 
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
@@ -191,18 +180,29 @@ class SpaceFlightWidget(QWidget):
         # ── 3-D starfield ─────────────────────────────────────────────────────
         self._rng   = random.Random(20260705)
         self._stars = [_Star(self._rng) for _ in range(_N_STARS)]
+
+        # Start as a single central pinprick and bloom into full field
+        self._active_stars: int = 1
+        for i, s in enumerate(self._stars):
+            s.z = float(_Z_FAR)
+            s.wx = 0.0
+            s.wy = 0.0
+            s.vz = self._rng.uniform(0.2, 0.6) if i == 0 else self._rng.uniform(0.1, 0.3)
+            s.color = self._rng.choice(_STAR_PALETTE)
+            s.base_r = self._rng.uniform(0.8, 1.6)
+
         # Speed multiplier — ramps up over Phase 2
         self._star_speed: float = 0.0
 
         # ── Nebulae (drift offsets in fraction-of-width) ──────────────────────
-        self._neb_ox = [0.0] * 4
-        self._neb_oy = [0.0] * 4
+        self._neb_ox = [0.0] * len(_NEBULA_DEFS)
+        self._neb_oy = [0.0] * len(_NEBULA_DEFS)
         self._neb_alpha = 0.0   # 0 → 1 during Phase 2
 
         # ── Va'ruun glyphs ────────────────────────────────────────────────────
         self._glyphs: list[_Glyph] = []
-        self._glyph_alpha: float   = 0.0    # master fade-in 0→1 Phase 3
-        self._glyph_fade:  float   = 1.0    # master fade-out 1→0 Phase 5+
+        self._glyph_alpha: float   = 0.0
+        self._glyph_fade:  float   = 1.0
         self._load_glyphs()
 
         # ── Electric tendrils (Phase 4: glyph↔glyph) ──────────────────────
@@ -213,22 +213,36 @@ class SpaceFlightWidget(QWidget):
             AncientFragment(word, i, seed=i * 997 + 42)
             for i, word in enumerate(_WORDS)
         ]
-        self._frag_final: list[tuple[float, float]] = []   # computed on resize
-        self._frag_launched: list[bool] = [False] * 9
+        self._frag_final: list[tuple[float, float]] = []
+        self._frag_launched: list[bool] = [False] * len(self._fragments)
         self._assembly_started: bool = False
 
         # ── Tendrils from glyph→fragment (Phase 6 lead-in) ────────────────
         self._tendrils_gf: list[ElectricTendril] = []
 
-        # ── Inscription progress ────────────────────────────────────────────
-        self._inscript_t: float = 0.0   # 0→1 across Phase 6
+        # ── Inscription progress ───────────────────────────────────────────
+        self._inscript_t: float = 0.0
 
-        # ── Scanline flicker ────────────────────────────────────────────────
-        self._scan_alpha: float = 0.55   # starts heavy, eases down
+        # ── Scanline flicker ───────────────────────────────────────────────
+        self._scan_alpha: float = 0.55
 
         # ── Mouse position (for hover) ──────────────────────────────────────
         self._mx: float = -9999.0
         self._my: float = -9999.0
+
+        # ── Nebula slider control (hidden by default) ──────────────────────
+        # Default set high for cinematic "massive nebula" on first run
+        self._neb_strength: float = 2.0   # 0.0 .. 2.0 (2.0 = very strong)
+        self._neb_slider = QSlider(Qt.Orientation.Horizontal, self)
+        self._neb_slider.setRange(0, 100)
+        self._neb_slider.setValue(int(self._neb_strength * 50))
+        self._neb_slider.setFixedWidth(260)
+        self._neb_slider.setToolTip("Nebula amount (press N to toggle)")
+        self._neb_slider.valueChanged.connect(self._on_neb_slider)
+        self._neb_slider.hide()
+        self._neb_label = QLabel("Nebula", self)
+        self._neb_label.setStyleSheet("color: rgba(255,255,255,180); background: transparent;")
+        self._neb_label.hide()
 
         # ── Timer — ~60 fps ────────────────────────────────────────────────
         self._timer = QTimer(self)
@@ -241,13 +255,77 @@ class SpaceFlightWidget(QWidget):
             sc = QShortcut(QKeySequence(key), self)
             sc.activated.connect(self._skip)
 
+        # Toggle nebula slider with 'N'
+        scn = QShortcut(QKeySequence("N"), self)
+        scn.activated.connect(self._toggle_neb_slider)
+
+    # -----------------------------------------------------------------
+    # Public helper: start / show the flight sequence
+    # Called by sig_launcher.py as flight.show_flight()
+    # -----------------------------------------------------------------
+    def show_flight(self) -> None:
+        """
+        Make the SpaceFlightWidget visible and ensure the sequence runs
+        from the beginning. This mirrors the expectation in sig_launcher.py.
+
+        NOTE: starts the sequence at AWAKENING so the starfield appears
+        immediately after the intro hands off.
+        """
+        try:
+            # Start the sequence at AWAKENING so the starfield appears immediately.
+            self._elapsed = _T_BREATH
+            self._phase = 2
+            self._last_phase = -1
+            self._finished = False
+
+            # Reset starfield activation so bloom restarts
+            self._active_stars = 1
+            for i, s in enumerate(self._stars):
+                s.z = float(_Z_FAR)
+                s.wx = 0.0
+                s.wy = 0.0
+                s.vz = self._rng.uniform(0.2, 0.6) if i == 0 else self._rng.uniform(0.1, 0.3)
+
+            # Reset glyph/fragment state defensively
+            try:
+                self._glyph_alpha = 0.0
+                self._glyph_fade = 1.0
+                self._inscript_t = 0.0
+                self._frag_launched = [False] * len(self._frag_launched)
+            except Exception:
+                pass
+
+            # Ensure the timer is running
+            if not self._timer.isActive():
+                self._timer.start()
+
+            # Show fullscreen and take focus so key events (ESC) are caught
+            self.showFullScreen()
+            self.setFocus(Qt.FocusReason.ActiveWindowFocusReason)
+
+            print("[SpaceFlightWidget] show_flight() invoked — sequence starting at AWAKENING.")
+        except Exception as exc:
+            print(f"[SpaceFlightWidget] show_flight() failed: {exc}")
+
+    # ── Nebula slider handlers ───────────────────────────────────────────────
+    def _on_neb_slider(self, val: int) -> None:
+        self._neb_strength = max(0.0, min(2.0, val / 50.0))
+
+    def _toggle_neb_slider(self) -> None:
+        if self._neb_slider.isVisible():
+            self._neb_slider.hide()
+            self._neb_label.hide()
+        else:
+            w, h = self.width(), self.height()
+            margin = 18
+            self._neb_slider.move(w - self._neb_slider.width() - margin, margin + 18)
+            self._neb_label.move(w - self._neb_slider.width() - margin, margin)
+            self._neb_slider.show()
+            self._neb_label.show()
+
     # ── Whispering Chambers helper ────────────────────────────────────────────
 
     def _whisper(self, text: str) -> None:
-        """
-        Send a soft whisper to TempleConsole.throne_speaks(text) if available,
-        otherwise print to stdout. Never raises — whispers fail silently.
-        """
         parent = self.parent()
         if parent is not None and hasattr(parent, "throne_speaks"):
             try:
@@ -260,7 +338,6 @@ class SpaceFlightWidget(QWidget):
     # ── Asset loading ─────────────────────────────────────────────────────────
 
     def _load_glyphs(self) -> None:
-        """Load SVG renderers; create _Glyph objects with random placement."""
         rng = random.Random(77)
         for i, fname in enumerate(_GLYPH_FILES):
             path = _GLYPH_DIR / fname
@@ -268,8 +345,6 @@ class SpaceFlightWidget(QWidget):
                 continue
             renderer = QSvgRenderer(str(path))
             size  = rng.uniform(52, 84)
-            # Spread across 70 % of the screen area — actual px computed in _tick
-            # We store fractional positions; convert to px in _tick / paintEvent
             x  = rng.uniform(0.12, 0.88)
             y  = rng.uniform(0.18, 0.72)
             vx = rng.uniform(-0.008, 0.008)
@@ -282,7 +357,6 @@ class SpaceFlightWidget(QWidget):
     # ── Geometry helpers ──────────────────────────────────────────────────────
 
     def _ensure_final_positions(self) -> None:
-        """Compute fragment ring positions once we know the widget size."""
         if self._frag_final:
             return
         w, h = self.width(), self.height()
@@ -293,31 +367,29 @@ class SpaceFlightWidget(QWidget):
         rng = random.Random(999)
         positions: list[tuple[float, float]] = []
         for i in range(n):
-            t   = (i / (n - 1)) - 0.5           # -0.5 … +0.5
-            # Gentle catenary-like arc
+            t   = (i / (n - 1)) - 0.5
             x   = cx + t * w * 0.74
-            arc = cy * 0.08 * (1.0 - (2 * t) ** 2)   # bows upward at centre
+            arc = cy * 0.08 * (1.0 - (2 * t) ** 2)
             y   = cy + arc + rng.uniform(-22, 22)
             positions.append((x, y))
         self._frag_final = positions
 
     def _spawn_pos(self, i: int) -> tuple[float, float]:
-        """Off-screen spawn point for fragment i."""
         w, h  = self.width(), self.height()
         rng   = random.Random(i * 13 + 5)
         edge  = rng.randint(0, 3)
         if edge == 0:
-            return rng.uniform(0, w), -160.0           # top
+            return rng.uniform(0, w), -160.0
         if edge == 1:
-            return rng.uniform(0, w), h + 160.0        # bottom
+            return rng.uniform(0, w), h + 160.0
         if edge == 2:
-            return -160.0, rng.uniform(0, h)           # left
-        return w + 160.0, rng.uniform(0, h)            # right
+            return -160.0, rng.uniform(0, h)
+        return w + 160.0, rng.uniform(0, h)
 
     # ── Main tick ─────────────────────────────────────────────────────────────
 
     def _tick(self) -> None:
-        dt = 0.016    # 16 ms
+        dt = 0.016
         self._elapsed += dt
         t = self._elapsed
 
@@ -332,6 +404,10 @@ class SpaceFlightWidget(QWidget):
 
         # Whisper on phase transitions (Whispering Chambers)
         if phase != self._last_phase:
+            try:
+                print(f"[SpaceFlightWidget] Phase transition: {self._last_phase} -> {phase} at t={t:.3f}s")
+            except Exception:
+                pass
             if phase == 1:
                 self._whisper("In the void, a single heartbeat remembers you.")
             elif phase == 2:
@@ -344,20 +420,41 @@ class SpaceFlightWidget(QWidget):
 
         # ── Phase 2: advance starfield + nebula ────────────────────────────
         if phase >= 2:
-            ph2_frac = min(1.0, (t - _T_BREATH) / 8.0)
-            self._star_speed  = 0.35 + ph2_frac * 1.8
-            self._neb_alpha   = min(1.0, ph2_frac * 1.4)
-            self._scan_alpha  = max(0.04, 0.55 - ph2_frac * 0.51)
+            ph2_lin = min(1.0, max(0.0, (t - _T_BREATH) / 8.0))
+            ph2_frac = 1.0 - (1.0 - ph2_lin) ** 3.0  # ease-out cubic
 
-            for star in self._stars:
+            # Nebula strength multiplier from slider (1.0 default)
+            neb_mul = 1.0 + self._neb_strength  # 1.0 .. 3.0
+            # star speed scales with nebula strength for cinematic warp
+            self._star_speed  = 0.35 + ph2_frac * 1.8 * (1.0 + self._neb_strength * 0.28)
+
+            # soften and cap nebula alpha so it never fully occludes the scene
+            raw_neb = ph2_frac * 1.6 * neb_mul
+            self._neb_alpha = min(0.78, raw_neb)  # cap at 0.78 for translucency
+
+            self._scan_alpha  = max(0.01, 0.55 - ph2_frac * (0.56 * (1.0 + self._neb_strength * 0.15)))
+
+            desired_active = max(1, int(ph2_frac * _N_STARS * (1.0 + self._neb_strength * 1.4)))
+            if desired_active > self._active_stars:
+                for i in range(self._active_stars, desired_active):
+                    s = self._stars[i]
+                    spread = 0.01 + ph2_frac * (0.48 + self._neb_strength * 0.12)
+                    s.wx = self._rng.uniform(-spread, spread)
+                    s.wy = self._rng.uniform(-spread, spread)
+                    s.z = float(_Z_FAR)
+                    s.vz = self._rng.uniform(0.6, 1.6) * (0.6 + ph2_frac * 1.6)
+                    s.color = self._rng.choice(_STAR_PALETTE)
+                    s.base_r = self._rng.uniform(0.8, 2.8)
+                self._active_stars = desired_active
+
+            for star in self._stars[:self._active_stars]:
                 star.z -= star.vz * self._star_speed
                 if star.z < _Z_NEAR:
                     star.reset(self._rng)
 
-            # Nebula drift
-            for k in range(4):
-                self._neb_ox[k] += _NEBULA_VX[k] * dt
-                self._neb_oy[k] += _NEBULA_VY[k] * dt
+            for k in range(len(self._neb_ox)):
+                self._neb_ox[k] += _NEBULA_VX[k] * dt * (1.0 + self._neb_strength * 0.28)
+                self._neb_oy[k] += _NEBULA_VY[k] * dt * (1.0 + self._neb_strength * 0.28)
 
         # ── Phase 3: glyph tumble ──────────────────────────────────────────
         if phase == 3:
@@ -375,7 +472,6 @@ class SpaceFlightWidget(QWidget):
             w, h = self.width(), self.height()
             g.x += g.vx * dt
             g.y += g.vy * dt
-            # Bounce gently within [0.05, 0.95]
             if not 0.05 < g.x < 0.95:
                 g.vx = -g.vx
             if not 0.05 < g.y < 0.95:
@@ -497,23 +593,18 @@ class SpaceFlightWidget(QWidget):
         w, h  = self.width(), self.height()
         cx, cy = w / 2.0, h / 2.0
 
-        # 0. Deep space background
         painter.fillRect(self.rect(), _VOID_COL)
 
-        # 1. BREATH — heartbeat pinpoint
         if phase == 1:
             self._paint_breath(painter, cx, cy, t)
 
-        # 2+. Stars and nebulae
         if phase >= 2:
             self._paint_nebulae(painter, w, h, t)
             self._paint_stars(painter, cx, cy, t)
 
-        # 3+. Glyphs
         if phase >= 3:
             self._paint_glyphs(painter, w, h, t)
 
-        # 4. Glyph↔glyph tendrils
         if phase == 4:
             ph4_frac = min(1.0, (t - _T_WANDERING) / 1.5)
             for tendril in self._tendrils_gg:
@@ -521,13 +612,11 @@ class SpaceFlightWidget(QWidget):
                 # keep endpoints live
                 tendril.draw(painter, t, ph4_frac)
 
-        # 5+. Fragments
         if phase >= 5:
             self._update_hover()
             for frag in self._fragments:
                 frag.draw(painter, t)
 
-        # Scanline flicker
         if self._scan_alpha > 0.01:
             self._paint_scanlines(painter, w, h)
 
@@ -542,9 +631,7 @@ class SpaceFlightWidget(QWidget):
         """
         period = 1.1
         tp = (t - _T_VOID) % period
-        # First beat: ramp up/down in 0.18 s
         b1 = max(0.0, 1.0 - abs(tp - 0.10) / 0.10)
-        # Second beat: slightly softer
         b2 = max(0.0, 0.78 * (1.0 - abs(tp - 0.32) / 0.10))
         pulse = max(b1, b2)
 
@@ -561,39 +648,64 @@ class SpaceFlightWidget(QWidget):
         painter.drawEllipse(QPointF(cx, cy), radius, radius)
 
     def _paint_nebulae(self, painter: QPainter, w: int, h: int, t: float) -> None:
+        """
+        Draw nebulae as translucent lightening washes so they enhance
+        the scene without fully occluding stars or fragments.
+        """
         painter.save()
-        painter.setOpacity(self._neb_alpha)
+        # Use a lightening blend so nebulae add color rather than block
+        try:
+            painter.setCompositionMode(QPainter.CompositionMode.Screen)
+        except Exception:
+            # Fallback: if CompositionMode not available, continue with normal mode
+            pass
+
+        # Slightly reduce overall opacity so nebula never fully covers stars
+        painter.setOpacity(max(0.12, min(1.0, self._neb_alpha * 0.92)))
+
         for k, (cfx, cfy, rfrac, inner, outer) in enumerate(_NEBULA_DEFS):
             ox  = self._neb_ox[k]
             oy  = self._neb_oy[k]
             px  = (cfx + ox) * w
             py  = (cfy + oy) * h
-            rad = rfrac * w
+            # scale radius with nebula strength for fuller field but keep bounds
+            rad = rfrac * w * (1.0 + self._neb_strength * 0.22)
             grad = QRadialGradient(QPointF(px, py), rad)
+
             ri, gi, bi, ai = inner
             ro, go, bo, ao = outer
-            grad.setColorAt(0.0, QColor(ri, gi, bi, ai))
+            # scale inner alpha down so nebula is a wash, not a solid
+            scaled_ai = int(ai * (0.55 + 0.45 * min(1.0, self._neb_strength)))
+            scaled_ai = max(18, min(220, scaled_ai))
+
+            grad.setColorAt(0.0, QColor(ri, gi, bi, scaled_ai))
             grad.setColorAt(1.0, QColor(ro, go, bo, ao))
             painter.setBrush(QBrush(grad))
             painter.setPen(Qt.PenStyle.NoPen)
             painter.drawEllipse(QPointF(px, py), rad, rad)
+
+        # restore normal composition and opacity for subsequent draws
+        try:
+            painter.setCompositionMode(QPainter.CompositionMode.SourceOver)
+        except Exception:
+            pass
         painter.restore()
 
     def _paint_stars(self, painter: QPainter, cx: float, cy: float, t: float) -> None:
         painter.setPen(Qt.PenStyle.NoPen)
-        ph2_frac = min(1.0, (self._elapsed - _T_BREATH) / 8.0)
-        for star in self._stars:
+        ph2_frac = min(1.0, max(0.08, (self._elapsed - _T_BREATH) / 8.0))
+        # slightly bias brightness when nebula is strong
+        neb_bias = 1.0 + self._neb_strength * 0.12
+        for star in self._stars[:self._active_stars]:
             sx = cx + _FOCAL * (star.wx * cx * 0.9) / star.z
             sy = cy + _FOCAL * (star.wy * cy * 0.9) / star.z
-            # Size grows as z decreases
             r  = star.base_r * (_FOCAL / star.z)
             r  = max(0.5, min(r, 6.0))
-            # Brightness proportional to proximity
-            bright = min(1.0, _FOCAL / star.z * 0.65)
+            bright = min(1.0, _FOCAL / star.z * 0.65 * neb_bias)
             c = star.color
-            painter.setBrush(
-                QColor(c.red(), c.green(), c.blue(), int(200 * bright * ph2_frac))
-            )
+            alpha = int(220 * bright * ph2_frac)
+            alpha = max(alpha, 28)
+            painter.setBrush(QColor(c.red(), c.green(), c.blue(), alpha))
             painter.drawEllipse(QPointF(sx, sy), r, r)
 
     def _paint_glyphs(self, painter: QPainter, w: int, h: int, t: float) -> None:
@@ -601,7 +713,7 @@ class SpaceFlightWidget(QWidget):
         if effective_alpha < 0.01:
             return
 
-        cobalt = QColor(59, 120, 231)   # #3B78E7
+        cobalt = QColor(59, 120, 231)
 
         for g in self._glyphs:
             px = g.x * w
@@ -613,10 +725,8 @@ class SpaceFlightWidget(QWidget):
             painter.rotate(g.angle)
             painter.setOpacity(effective_alpha * 0.82)
 
-            # Render SVG into a rect; tint cyan-cobalt via CompositionMode
             rect = QRectF(-sz / 2, -sz / 2, sz, sz)
 
-            # Two-pass: glow halo first
             painter.setBrush(QBrush(QColor(cobalt.red(), cobalt.green(),
                                           cobalt.blue(), 35)))
             painter.setPen(Qt.PenStyle.NoPen)
@@ -629,7 +739,7 @@ class SpaceFlightWidget(QWidget):
         painter.save()
         painter.setOpacity(self._scan_alpha)
         col = QColor(0, 0, 0, 70)
-        painter.fillRect(0, 0, w, h, _VOID_COL)   # don't double-fill; skip
+        painter.fillRect(0, 0, w, h, _VOID_COL)
         painter.setPen(QPen(col, 1.0))
         y = 0
         while y < h:
@@ -637,31 +747,7 @@ class SpaceFlightWidget(QWidget):
             y += 4
         painter.restore()
 
-    # ── Resize ────────────────────────────────────────────────────────────────
-
     def resizeEvent(self, event) -> None:
-        # Invalidate cached positions so they recompute at new size
         self._frag_final = []
+        self._ensure_final_positions()
         super().resizeEvent(event)
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# Standalone test harness
-# ══════════════════════════════════════════════════════════════════════════════
-if __name__ == "__main__":
-    import sys
-
-    app = QApplication(sys.argv)
-
-    win = SpaceFlightWidget()
-    win.setWindowTitle("SIG — Ancient Intelligence Awakening (standalone test)")
-    win.resize(1280, 720)
-    win.show()
-    win.raise_()
-
-    # Print a confirmation when the sequence finishes
-    win.flight_finished.connect(
-        lambda: print("[SpaceFlightWidget] flight_finished emitted — sequence complete.")
-    )
-
-    sys.exit(app.exec())

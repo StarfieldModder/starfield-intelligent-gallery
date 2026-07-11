@@ -1,32 +1,38 @@
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║        ███████╗ ██╗  ██████╗      S I G _ L A U N C H E R . P Y             ║
+║        ███████╗ ██╗  ██████╗      S I G _ L A U N C H E R . P Y              ║
 ║        ██╔════╝ ██║ ██╔════╝      GUI Front Door — Full Cinematic Chain      ║
 ║        ███████╗ ██║ ██║  ███╗                                                ║
 ║        ╚════██║ ██║ ██║   ██║     Starfield Intelligent Gallery              ║
 ║        ███████║ ██║ ╚██████╔╝                                                ║
-║        ╚══════╝ ╚═╝  ╚═════╝      "Open the hatch. Let the story begin."    ║
+║        ╚══════╝ ╚═╝  ╚═════╝      "Open the hatch. Let the story begin."     ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  sig_launcher.py                                               ║
 ║  Location   :  C:\SIG\sig_launcher.py                                        ║
 ║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                     ║
 ║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                     ║
-║  Version    :  2026.07.05 — Full Cinematic Chain Edition                     ║
+║  Version    :  2026.07.10 — Full Cinematic Chain Edition                     ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  FULL SEQUENCE                                                               ║
 ║    1. IntroPanelWidget    Title fade + The Crossing video (29.9 s)           ║
 ║    2. SpaceFlightWidget   Deep space cinematic (22 s):                       ║
-║                             Black → Pinpoint → Warp + Nebulae               ║
+║                             Black → Pinpoint → Warp + Nebulae                ║
 ║                             → JOURNEY panel approach                         ║
-║                             → Varuun glyphs dart in + land                  ║
+║                             → Varuun glyphs dart in + land                   ║
 ║                             → "JOURNEY" coalesces letter by letter           ║
 ║    3. CarrierDeck         5 panels materialise from particle clouds          ║
 ║    4. CosmicChoicePanel   Player selects their path                          ║
 ║                                                                              ║
 ║  SAFETY RULES                                                                ║
-║    • All widgets kept in _alive[] — no Python GC kills them                 ║
-║    • Every step wrapped in try/except — no silent black freezes             ║
-║    • SpaceFlightWidget failure skips straight to CarrierDeck                ║
+║    • All widgets kept in _alive[] — no Python GC kills them                  ║
+║    • Every step wrapped in try/except — no silent black freezes              ║
+║    • SpaceFlightWidget failure skips straight to CarrierDeck                 ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  NOTES                                                                       ║
+║    • IntroPanelWidget now hands off to the launcher; launcher creates the    ║
+║      SpaceFlightWidget and calls show_flight().                              ║
+║    • Global ESC event filter installed so Escape quits cleanly.              ║
+║    • Defensive duplicate-check prevents double flight launches.              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
@@ -46,6 +52,31 @@ def launch_sig() -> None:
     """Full SIG cinematic launch sequence."""
     app = QApplication(sys.argv)
 
+    # -----------------------------------------------------------------
+    # Global ESC handler: install an event filter that quits the app
+    # when the user presses the Escape key anywhere in the UI.
+    # -----------------------------------------------------------------
+    from PySide6.QtCore import Qt, QEvent, QObject
+
+    class EscEventFilter(QObject):
+        def __init__(self, app):
+            super().__init__()
+            self._app = app
+
+        def eventFilter(self, watched, event):
+            # Catch KeyPress events and handle Escape
+            if event.type() == QEvent.Type.KeyPress:
+                if event.key() == Qt.Key.Key_Escape:
+                    print("[SIG Launcher] ESC pressed — shutting down.")
+                    # Cleanly stop the Qt event loop
+                    self._app.quit()
+                    return True
+            return super().eventFilter(watched, event)
+
+    # Install the filter on the application so ESC is caught globally
+    esc_filter = EscEventFilter(app)
+    app.installEventFilter(esc_filter)
+
     # All top-level widgets stored here — prevents Python garbage collection
     _alive: list = []
 
@@ -62,11 +93,17 @@ def launch_sig() -> None:
 
     def _launch_flight() -> None:
         # ── STEP 2 — SpaceFlightWidget ────────────────────────────────────
+        # Defensive: if a SpaceFlightWidget is already alive, skip duplicate launch.
+        for w in _alive:
+            if isinstance(w, SpaceFlightWidget):
+                print("[SIG Launcher] _launch_flight called but SpaceFlightWidget already running — ignoring duplicate.")
+                return
+
         try:
             flight = SpaceFlightWidget()
             _alive.append(flight)
             flight.flight_finished.connect(on_flight_finished)
-            flight.showFullScreen()
+            # Use the widget's public API to start the cinematic
             flight.show_flight()
             print("[SIG Launcher]  ✦ Space Flight — engines lit.")
         except Exception as exc:
@@ -79,8 +116,11 @@ def launch_sig() -> None:
         # Cleanly close the flight widget
         for w in list(_alive):
             if isinstance(w, SpaceFlightWidget):
-                w.hide()
-                w.close()
+                try:
+                    w.hide()
+                    w.close()
+                except Exception:
+                    pass
 
         # ── STEP 3 — CarrierDeck ──────────────────────────────────────────
         try:

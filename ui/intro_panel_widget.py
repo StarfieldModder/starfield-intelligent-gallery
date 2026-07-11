@@ -11,7 +11,7 @@ r"""
 ║  Location   :  C:\SIG\ui\intro_panel_widget.py                               ║
 ║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                     ║
 ║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                     ║
-║  Version    :  2026.07.06 — Whispering Chamber Edition                       ║
+║  Version    :  2026.07.10 — Whispering Chamber Edition                       ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  WHAT THIS FILE DOES                                                         ║
 ║                                                                              ║
@@ -35,7 +35,6 @@ r"""
 ║    On flight_finished → intro_finished is emitted exactly once.              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
-
 from __future__ import annotations
 
 import sys
@@ -56,13 +55,13 @@ try:
 except ImportError:
     _MULTIMEDIA_AVAILABLE = False
 
-# ── Whispering Chamber — Ancient Intelligence Awakening ──────────────────────
+# ── Whispering Chamber availability check (do not create widget here) ───────
 try:
-    from ui.space_flight_widget import SpaceFlightWidget
+    from ui.space_flight_widget import SpaceFlightWidget  # type: ignore
     _SPACE_FLIGHT_AVAILABLE = True
-except ImportError:
+except Exception:
     _SPACE_FLIGHT_AVAILABLE = False
-    print("[IntroPanelWidget]  SpaceFlightWidget not found — skipping Whispering Chamber.")
+    print("[IntroPanelWidget]  SpaceFlightWidget not importable — launcher will handle it.")
 
 # ── Timing constants ──────────────────────────────────────────────────────────
 TITLE_FADE_IN_MS  = 1_500    # 1.5 s  fade in
@@ -107,19 +106,16 @@ def _find_video() -> Path | None:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  I N T R O   P A N E L   W I D G E T
-# ══════════════════════════════════════════════════════════════════════════════
-
 class IntroPanelWidget(QWidget):
     """
     Cinematic three-part intro:
 
     1. Title sequence (fade-in → hold → fade-out).
     2. The Crossing video (PATH A) or brief black pause (PATH B).
-    3. Whispering Chamber — SpaceFlightWidget Ancient Intelligence Awakening.
+    3. Hand off to launcher for Whispering Chamber (SpaceFlightWidget).
 
     intro_finished is emitted only after the Whispering Chamber completes
-    (or is skipped), regardless of PATH A or PATH B.
+    (or is skipped). Intro no longer creates or shows the SpaceFlightWidget.
     """
 
     intro_finished = Signal()
@@ -134,9 +130,7 @@ class IntroPanelWidget(QWidget):
         self._video_widget  = None
         self._timeout_timer = None
         self._anim_group    = None
-        self._flight_widget = None
-
-        self._video_path = _find_video()
+        self._video_path    = _find_video()
 
         # Video built first (lower z-order), title built second (on top)
         self._build_video_layer()
@@ -155,17 +149,10 @@ class IntroPanelWidget(QWidget):
         self._title_widget.setGeometry(r)
         if self._video_widget is not None:
             self._video_widget.setGeometry(r)
-        if self._flight_widget is not None:
-            self._flight_widget.setGeometry(r)
 
     # ── Build helpers ─────────────────────────────────────────────────────────
 
     def _build_title_widget(self) -> None:
-        """
-        Full-screen black panel. Label in deep cobalt #3B78E7.
-        Widget starts HIDDEN — shown only when animation begins.
-        Opacity effect pre-attached and set to 0.0 to prevent flash.
-        """
         self._title_widget = QWidget(self)
         self._title_widget.setStyleSheet("background-color: black;")
 
@@ -186,19 +173,14 @@ class IntroPanelWidget(QWidget):
         lay.addWidget(self._title_label)
         lay.addStretch()
 
-        # ── Pre-attach opacity effect at 0.0 BEFORE show() — no flash ─────
         self._opacity_effect = QGraphicsOpacityEffect(self._title_label)
         self._title_label.setGraphicsEffect(self._opacity_effect)
         self._opacity_effect.setOpacity(0.0)
 
         self._title_widget.setGeometry(self.rect())
-        self._title_widget.hide()   # ← stays hidden until animation starts
+        self._title_widget.hide()
 
     def _build_video_layer(self) -> None:
-        """
-        Hidden video widget. player.pause() pre-buffers the video
-        during the 5.5 s title sequence for instant playback after.
-        """
         if not _MULTIMEDIA_AVAILABLE:
             print("[SIG Intro]  PySide6-QtMultimedia not installed — PATH B.")
             return
@@ -235,33 +217,22 @@ class IntroPanelWidget(QWidget):
         """Call once from sig_launcher.py. Title sequence always runs first."""
         self._run_title_sequence()
 
-    # ── Title sequence ────────────────────────────────────────────────────────
+    # ── Title sequence ───────────────────────────────────────────────────────
 
     def _run_title_sequence(self) -> None:
-        """
-        Uses QSequentialAnimationGroup — the only reliable way to chain
-        Qt animations without QTimer bool-arg injection bugs.
-
-        Group: fade-in (1.5s) → pause/hold (2.5s) → fade-out (1.5s)
-        On group.finished → _on_title_done()
-        """
-        # Show title widget NOW — opacity is already 0.0 so no flash
         self._title_widget.show()
         self._title_widget.raise_()
 
-        # Fade IN
         anim_in = QPropertyAnimation(self._opacity_effect, b"opacity", self)
         anim_in.setDuration(TITLE_FADE_IN_MS)
         anim_in.setStartValue(0.0)
         anim_in.setEndValue(1.0)
 
-        # Fade OUT
         anim_out = QPropertyAnimation(self._opacity_effect, b"opacity", self)
         anim_out.setDuration(TITLE_FADE_OUT_MS)
         anim_out.setStartValue(1.0)
         anim_out.setEndValue(0.0)
 
-        # Sequential group: in → hold → out  (single unit, no chaining bugs)
         self._anim_group = QSequentialAnimationGroup(self)
         self._anim_group.addAnimation(anim_in)
         self._anim_group.addPause(TITLE_HOLD_MS)
@@ -270,17 +241,14 @@ class IntroPanelWidget(QWidget):
         self._anim_group.start()
 
     def _on_title_done(self) -> None:
-        """Title fully faded out — hand off to video (PATH A) or Whispering Chamber (PATH B)."""
         self._title_widget.hide()
 
         if self._player is not None:
-            # PATH A — reveal video, play (already buffered)
             self._video_widget.setGeometry(self.rect())
             self._video_widget.show()
             self._video_widget.raise_()
             self._start_video()
         else:
-            # PATH B — brief black pause then Whispering Chamber
             QTimer.singleShot(FALLBACK_HOLD_MS, self._start_whispering_chamber)
 
     # ── Video playback (PATH A) ───────────────────────────────────────────────
@@ -298,24 +266,23 @@ class IntroPanelWidget(QWidget):
     def _on_playback_state(self, state) -> None:
         from PySide6.QtMultimedia import QMediaPlayer as _QMP
         if state == _QMP.PlaybackState.StoppedState:
-            # When video ends naturally, move into Whispering Chamber
             self._start_whispering_chamber()
 
     def _on_player_error(self, error, error_string: str) -> None:
         print(f"[SIG Intro]  Player error: {error_string} — falling back.")
         QTimer.singleShot(FALLBACK_HOLD_MS, self._start_whispering_chamber)
 
-    # ── Whispering Chamber — SpaceFlightWidget ───────────────────────────────
+    # ── Whispering Chamber handoff (launcher owns widget) ────────────────────
 
     def _start_whispering_chamber(self) -> None:
         """
-        Launch the Ancient Intelligence Awakening sequence.
-        When flight_finished fires, we emit intro_finished.
+        Stop video and hand off to the launcher. Do NOT create or show
+        SpaceFlightWidget here — the launcher will create it after
+        intro_finished is emitted.
         """
         if self._done:
             return
 
-        # Stop video-related timers/player cleanly
         if self._timeout_timer:
             self._timeout_timer.stop()
             self._timeout_timer = None
@@ -329,14 +296,9 @@ class IntroPanelWidget(QWidget):
             self._finish()
             return
 
-        if self._flight_widget is None:
-            self._flight_widget = SpaceFlightWidget(self)
-            self._flight_widget.setGeometry(self.rect())
-            self._flight_widget.flight_finished.connect(self._on_flight_finished)
-
-        self._flight_widget.show()
-        self._flight_widget.raise_()
-        print("[IntroPanelWidget]  Whispering Chamber opened — Ancient Intelligence Awakening running.")
+        # Hand off to the launcher to create and show the flight widget.
+        print("[IntroPanelWidget]  Whispering Chamber ready — handing off to launcher.")
+        self._finish()
 
     def _on_flight_finished(self) -> None:
         """SpaceFlightWidget has completed — now emit intro_finished."""
@@ -357,8 +319,6 @@ class IntroPanelWidget(QWidget):
             self._timeout_timer.stop()
         if self._player:
             self._player.stop()
-        if self._flight_widget:
-            self._flight_widget.hide()
 
         print("[SIG Intro]  Complete — handing off to Carrier Deck.")
         self.intro_finished.emit()
@@ -369,15 +329,10 @@ class IntroPanelWidget(QWidget):
         skip = (Qt.Key.Key_Space, Qt.Key.Key_Return,
                 Qt.Key.Key_Enter, Qt.Key.Key_Escape)
         if event.key() in skip:
-            # If user skips at any point, finish immediately.
             self._finish()
         else:
             super().keyPressEvent(event)
 
-
-# ══════════════════════════════════════════════════════════════════════════════
-#  Standalone test  —  .venv\Scripts\python.exe ui\intro_panel_widget.py
-# ══════════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
