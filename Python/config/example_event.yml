@@ -1,0 +1,42 @@
+
+---
+
+### 2. Example config: `config/example_event.yml`
+
+```yaml
+# ================================================================
+# File: config/example_event.yml
+# Location: config/
+# Author: Mark J. Latsha
+# Created: 2026-05-27
+# Description: Example event config demonstrating rarity, pity, and unlock predicates.
+# ================================================================
+event:
+  id: "summer-festival-2026"
+  name: "Summer Festival 2026"
+  start_at: "2026-06-01T00:00:00Z"
+  end_at: "2026-06-30T23:59:59Z"
+
+rarity_table:
+  Common: 0.60
+  Uncommon: 0.25
+  Rare: 0.10
+  Epic: 0.04
+  Legendary: 0.009
+  Mythic: 0.001
+
+pity:
+  enabled: true
+  attempts_to_guarantee_rare: 50
+
+acquisition_sources:
+  - type: "loot_table"
+    id: "festival_chest"
+    min_player_level: 1
+    max_player_level: 100
+    per_player_cooldown_seconds: 3600
+
+unlock_predicates:
+  relic_firecore:
+    min_player_level: 10
+    required_flag: "festival_intro_complete"

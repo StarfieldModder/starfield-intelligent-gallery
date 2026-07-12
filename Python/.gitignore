@@ -1,0 +1,130 @@
+# ================================================================
+# File: .gitignore
+# Location: repository root
+# Author: Mark J. Latsha
+# Co-Author: Microsoft Copilot
+# Created: 2026-05-27
+# Description:
+#   Recommended ignore rules for the Starfield Intelligent Gallery
+#   project. Keeps local build artifacts, caches, large media dumps,
+#   and sensitive environment files out of the repository.
+# Notes:
+#   - Review data/ and assets/ rules before pushing; remove lines
+#     for any files you intentionally want to track.
+# ================================================================
+
+# -------------------------
+# OS / Editor / IDE
+# -------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+env/
+venv/
+.env
+.env.*.local
+pip-log.txt
+pip-delete-this-directory.txt
+
+# -------------------------
+# Node / JS (if present)
+# -------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.pnpm-debug.log
+
+# -------------------------
+# Build / Coverage / Test
+# -------------------------
+coverage/
+htmlcov/
+*.egg-info/
+dist/
+build/
+.eggs/
+.tox/
+.nox/
+pytest_cache/
+
+# -------------------------
+# Virtual DBs and local data
+# -------------------------
+# Local SQLite DB used during development
+*.db
+*.sqlite
+photos.db
+
+# Data folders (often large; keep out of repo unless intentionally tracked)
+data/raw/
+data/processed/
+data/tmp/
+exports/
+exports/*
+
+# -------------------------
+# Large media and generated assets
+# -------------------------
+# Ignore large generated icons, thumbnails, and caches
+*.ico
+*.png
+*.jpg
+*.jpeg
+*.dds
+*.tga
+thumbnails/
+thumbs.db
+cache/
+*.psd
+*.xcf
+
+# If you DO want to track specific assets, add them explicitly:
+# !assets/logo/SIG_icon.ico
+
+# -------------------------
+# Application specific
+# -------------------------
+# PyQt build artifacts and UI caches
+*.pyc
+*.pyrcc
+*.qrc
+*.ui.py
+
+# Logs and runtime files
+logs/
+*.log
+*.pid
+*.seed
+
+# -------------------------
+# Secrets and local config
+# -------------------------
+secrets/
+*.pem
+*.key
+*.crt
+credentials.json
+local_settings.py
+
+# -------------------------
+# Misc
+# -------------------------
+coverage.xml
+coverage.*
+*.cover
+*.swp
+*.swo
