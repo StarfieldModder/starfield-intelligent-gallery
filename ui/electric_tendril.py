@@ -1,13 +1,13 @@
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║   E L E C T R I C _ T E N D R I L . P Y                                     ║
+║   E L E C T R I C _ T E N D R I L . P Y                                      ║
 ║   Starfield Intelligent Gallery  ·  2026.07.05                               ║
 ║   Author  : Mark J. Latsha  (StarfieldModder / Games)                        ║
-║   Co-Author: Microsoft Copilot (AI Engineer Colleague)                        ║
+║   Co-Author: Microsoft Copilot (AI Engineer Colleague)                       ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  Branching plasma filament between two world-space points.                   ║
-║                                                                               ║
-║  VISUAL BEHAVIOUR                                                             ║
+║                                                                              ║
+║  VISUAL BEHAVIOUR                                                            ║
 ║    • Main trunk: cubic Bézier whose two control points jitter every frame    ║
 ║      using seeded sin/cos oscillators — looks alive, never repeats exactly.  ║
 ║    • Sub-branches: N quadratic arcs forking from random trunk positions,     ║
@@ -15,10 +15,10 @@ r"""
 ║    • Two-pass rendering: fat translucent outer glow + thin bright hot core.  ║
 ║    • Alpha pulses on a sine wave — the filament breathes and flickers.       ║
 ║    • Color: cyan #00F0DC → white-hot core, amber #FFB830 branches.           ║
-║                                                                               ║
-║  USAGE                                                                        ║
+║                                                                              ║
+║  USAGE                                                                       ║
 ║    t = ElectricTendril((sx, sy), (ex, ey), seed=42)                          ║
-║    t.update_endpoints((sx, sy), (ex, ey))  # call each frame if pts move    ║
+║    t.update_endpoints((sx, sy), (ex, ey))  # call each frame if pts move     ║
 ║    t.draw(painter, elapsed_seconds)         # call inside paintEvent         ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """

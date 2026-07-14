@@ -1,46 +1,46 @@
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                                                                              ║
-║   ██████╗ ██╗██████╗ ███████╗██╗     ██╗███╗   ██╗███████╗                 ║
-║   ██╔══██╗██║██╔══██╗██╔════╝██║     ██║████╗  ██║██╔════╝                 ║
-║   ██████╔╝██║██████╔╝█████╗  ██║     ██║██╔██╗ ██║█████╗                   ║
-║   ██╔═══╝ ██║██╔═══╝ ██╔══╝  ██║     ██║██║╚██╗██║██╔══╝                   ║
-║   ██║     ██║██║     ███████╗███████╗██║██║ ╚████║███████╗                 ║
-║   ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝                 ║
+║   ██████╗ ██╗██████╗ ███████╗██╗     ██╗███╗   ██╗███████╗                   ║
+║   ██╔══██╗██║██╔══██╗██╔════╝██║     ██║████╗  ██║██╔════╝                   ║
+║   ██████╔╝██║██████╔╝█████╗  ██║     ██║██╔██╗ ██║█████╗                     ║
+║   ██╔═══╝ ██║██╔═══╝ ██╔══╝  ██║     ██║██║╚██╗██║██╔══╝                     ║
+║   ██║     ██║██║     ███████╗███████╗██║██║ ╚████║███████╗                   ║
+║   ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝                   ║
 ║                                                                              ║
-║              C I N E M A T I C   P I P E L I N E                           ║
+║              C I N E M A T I C   P I P E L I N E                             ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  cinematic_pipeline_cinematic.py                               ║
-║  Location   :  C:\SIG\ui\cinematic_pipeline_cinematic.py                    ║
-║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                    ║
+║  Location   :  C:\SIG\ui\cinematic_pipeline_cinematic.py                     ║
+║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                     ║
 ║  Co-Author  :  Microsoft Copilot (AI Engineering Collaborator)               ║
-║  Version    :  2026.07.01 — Carrier Deck Edition                            ║
+║  Version    :  2026.07.01 — Carrier Deck Edition                             ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  WHAT CHANGED vs stacking-fix build                                          ║
 ║                                                                              ║
-║  • set_background() now accepts an OPTIONAL path.  When path is None        ║
-║    (the new default), the background is set to solid black — no PNG         ║
-║    is required.  This retires the starfield_soft.png dependency from        ║
+║  • set_background() now accepts an OPTIONAL path.  When path is None         ║
+║    (the new default), the background is set to solid black — no PNG          ║
+║    is required.  This retires the starfield_soft.png dependency from         ║
 ║    this module entirely.                                                     ║
-║  • starfield_soft.png is still accepted if you pass its path explicitly     ║
-║    (backward-compatible with any code that calls set_background(path)).     ║
-║  • The physical file at C:\SIG\Assets\starfield_soft.png is left on disk    ║
-║    — other legacy code may still reference it.  This file just won't        ║
+║  • starfield_soft.png is still accepted if you pass its path explicitly      ║
+║    (backward-compatible with any code that calls set_background(path)).      ║
+║  • The physical file at C:\SIG\Assets\starfield_soft.png is left on disk     ║
+║    — other legacy code may still reference it.  This file just won't         ║
 ║    use it by default any more.                                               ║
 ║                                                                              ║
 ║  ARCHITECTURE                                                                ║
-║  Absolute child geometry for deterministic z-stacking:                      ║
-║    self.bg       (QLabel)         — fills widget, painted or black          ║
-║    self.artifact (ArtifactReveal) — overlay raised above bg                 ║
+║  Absolute child geometry for deterministic z-stacking:                       ║
+║    self.bg       (QLabel)         — fills widget, painted or black           ║
+║    self.artifact (ArtifactReveal) — overlay raised above bg                  ║
 ║                                                                              ║
 ║  METHODS                                                                     ║
-║    set_background(path=None)   — load PNG or go solid black                 ║
-║    fade_in(ms=1200)            — QPropertyAnimation on bg opacity           ║
-║    fade_out(ms=800)            — reverse fade                               ║
-║    play_artifact_reveal()      — halo + glyph reveal sequence               ║
-║    play_temple_sequence()      — Cosmic Choice panel sequence               ║
-║    update_breath()             — ambient light-breathing (timer slot)       ║
-║    ESC                         — exits the window                           ║
+║    set_background(path=None)   — load PNG or go solid black                  ║
+║    fade_in(ms=1200)            — QPropertyAnimation on bg opacity            ║
+║    fade_out(ms=800)            — reverse fade                                ║
+║    play_artifact_reveal()      — halo + glyph reveal sequence                ║
+║    play_temple_sequence()      — Cosmic Choice panel sequence                ║
+║    update_breath()             — ambient light-breathing (timer slot)        ║
+║    ESC                         — exits the window                            ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 

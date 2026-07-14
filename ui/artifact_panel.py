@@ -1,15 +1,15 @@
 # ================================================================
 # ╔══════════════════════════════════════════════════════════════╗
 # ║              A R T I F A C T   P A N E L                     ║
-# ║              Starfield Intelligent Gallery — Minimal Edition  ║
+# ║              Starfield Intelligent Gallery — Minimal Edition ║
 # ╠══════════════════════════════════════════════════════════════╣
-# ║  File      :  artifact_panel.py                               ║
-# ║  Location  :  C:\SIG\ui\artifact_panel.py                     ║
-# ║  Author    :  Mark J. Latsha  (StarfieldModder / Games)       ║
-# ║  Co-Author :  Microsoft Copilot (AI Engineering Collaborator) ║
-# ║  Version   :  2026.07.01 — Carrier Deck Edition               ║
+# ║  File      :  artifact_panel.py                              ║
+# ║  Location  :  C:\SIG\ui\artifact_panel.py                    ║
+# ║  Author    :  Mark J. Latsha  (StarfieldModder / Games)      ║
+# ║  Co-Author :  Microsoft Copilot (AI Engineering Collaborator)║
+# ║  Version   :  2026.07.01 — Carrier Deck Edition              ║
 # ╠══════════════════════════════════════════════════════════════╣
-# ║  WHAT CHANGED vs original                                     ║
+# ║  WHAT CHANGED vs original                                    ║
 # ║  • STARFIELD_PATH and StarfieldLayer are RETIRED.            ║
 # ║    starfield_soft.png is superseded by The Crossing MP4      ║
 # ║    played through IntroPanelWidget / sig_layer_video.py.     ║
@@ -17,7 +17,7 @@
 # ║    the method is kept as a no-op so any legacy callers       ║
 # ║    that call it directly don't crash.                        ║
 # ║  • Arc PNGs (arc_outer, arc_inner, arc_orbit, arc_core)      ║
-# ║    still load defensively — unchanged.                        ║
+# ║    still load defensively — unchanged.                       ║
 # ║  • Shimmer timer removed (no PNG to shimmer).                ║
 # ╚══════════════════════════════════════════════════════════════╝
 

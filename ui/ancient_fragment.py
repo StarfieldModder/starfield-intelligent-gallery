@@ -1,19 +1,19 @@
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║   A N C I E N T _ F R A G M E N T . P Y                                     ║
+║   A N C I E N T _ F R A G M E N T . P Y                                      ║
 ║   Starfield Intelligent Gallery  ·  2026.07.05                               ║
 ║   Author  : Mark J. Latsha  (StarfieldModder / Games)                        ║
-║   Co-Author: Microsoft Copilot (AI Engineer Colleague)                        ║
+║   Co-Author: Microsoft Copilot (AI Engineer Colleague                        ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  Floating curved stone relic fragment.                                        ║
-║  Each fragment is a unique organic QPainterPath shape — amber-tinted,         ║
-║  semi-transparent so nebula glows through, breathing at its own frequency,    ║
-║  orbiting into the ring formation, erupting embers on contact, and            ║
-║  responding to hover with scale + brightness surge.                           ║
-║                                                                               ║
-║  STATE MACHINE                                                                ║
+║  Floating curved stone relic fragment.                                       ║
+║  Each fragment is a unique organic QPainterPath shape — amber-tinted,        ║
+║  semi-transparent so nebula glows through, breathing at its own frequency,   ║
+║  orbiting into the ring formation, erupting embers on contact, and           ║
+║  responding to hover with scale + brightness surge.                          ║
+║                                                                              ║
+║  STATE MACHINE                                                               ║
 ║    DORMANT  → DRIFTING → ORBITING → SETTLING → SETTLED → SELECTED / DIMMED   ║
-║                                                                               ║
+║                                                                              ║
 ║  Fragment carries one word of "YOU HAVE ENTERED A NEW WORLD A NEW UNIVERSE"  ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """

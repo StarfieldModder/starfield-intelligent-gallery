@@ -1,11 +1,11 @@
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║        ███████╗ ██╗  ██████╗     M A I N . P Y                              ║
-║        ██╔════╝ ██║ ██╔════╝     Mission Control — SIG Entry Point          ║
+║        ███████╗ ██╗  ██████╗     M A I N . P Y                               ║
+║        ██╔════╝ ██║ ██╔════╝     Mission Control — SIG Entry Point           ║
 ║        ███████╗ ██║ ██║  ███╗                                                ║
 ║        ╚════██║ ██║ ██║   ██║    Starfield Intelligent Gallery               ║
 ║        ███████║ ██║ ╚██████╔╝                                                ║
-║        ╚══════╝ ╚═╝  ╚═════╝     "Every great journey begins with           ║
+║        ╚══════╝ ╚═╝  ╚═════╝     "Every great journey begins with            ║
 ║                                    a single line of code."                   ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  main.py                                                       ║
