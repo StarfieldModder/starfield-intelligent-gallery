@@ -1,0 +1,8 @@
+LICENSE
+README.md
+pyproject.toml
+starfield_intelligent_gallery.egg-info/PKG-INFO
+starfield_intelligent_gallery.egg-info/SOURCES.txt
+starfield_intelligent_gallery.egg-info/dependency_links.txt
+starfield_intelligent_gallery.egg-info/entry_points.txt
+starfield_intelligent_gallery.egg-info/top_level.txt

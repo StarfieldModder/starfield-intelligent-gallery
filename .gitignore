@@ -1,129 +1,1 @@
-<# ================================================================
-# File: .gitignore
-# Location: repository root
-# Author: Mark J. Latsha
-# Co-Author: Microsoft Copilot
-# Updated: 2026-06-07
-# Description:
-#   Consolidated ignore rules for the Starfield Intelligent Gallery
-#   project. Removes merge conflict, combines Python + project rules,
-#   and excludes backup/DO-NOT-USE folders.
-# ================================================================
-
-# -------------------------
-# OS / Editor / IDE
-# -------------------------
-.DS_Store
-Thumbs.db
-desktop.ini
-.vscode/
-.idea/
-*.sublime-workspace
-*.sublime-project
-
-# -------------------------
-# Python
-# -------------------------
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-.venv/
-venv/
-env/
-.env
-.env.*.local
-pip-log.txt
-pip-delete-this-directory.txt
-
-# -------------------------
-# Node / JS (if present)
-# -------------------------
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log
-package-lock.json
-
-# -------------------------
-# Build / Coverage / Test
-# -------------------------
-coverage/
-htmlcov/
-*.egg-info/
-dist/
-build/
-.eggs/
-.tox/
-.nox/
-pytest_cache/
-coverage.xml
-coverage.*
-*.cover
-
-# -------------------------
-# Virtual DBs and local data
-# -------------------------
-*.db
-*.sqlite
-photos.db
-
-# Data folders (large - exclude unless intentionally tracked)
-data/raw/
-data/processed/
-data/tmp/
-exports/
-
-# -------------------------
-# Large media and generated assets
-# -------------------------
-*.ico
-*.png
-*.jpg
-*.jpeg
-*.dds
-*.tga
-*.psd
-*.xcf
-thumbnails/
-thumbs.db
-cache/
-
-# If you DO want specific assets tracked:
-# !assets/logo/SIG_icon.ico
-
-# -------------------------
-# Application specific
-# -------------------------
-*.pyrcc
-*.qrc
-*.ui.py
-
-# Logs and runtime files
-logs/
-*.log
-*.pid
-*.seed
-
-# -------------------------
-# Secrets and local config
-# -------------------------
-secrets/
-*.pem
-*.key
-*.crt
-credentials.json
-local_settings.py
-
-# -------------------------
-# Backup / DO NOT USE folders
-# -------------------------
-# Local backup of arcs — do not commit to GitHub
-ui/Assets/arcs_backup_DO_NOT_USE/
-
-# -------------------------
-# Misc
-# -------------------------
-*.swp
-*.swo
+# Python bytecode__pycache__/*.pyc*.pyo*.pyd# Virtual environments.venv/venv/env/# Logs*.loglogs/SIG/logs/# OS junkThumbs.db.DS_Store# VS Code.vscode/# Build artifactsbuild/dist/*.egg-info/# Cache.cache/
