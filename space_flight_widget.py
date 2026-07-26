@@ -1,11 +1,11 @@
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║        ███████╗ ██╗  ██████╗                                                 ║
-║        ██╔════╝ ██║ ██╔════╝   S P A C E _ F L I G H T _ W I D G E T . P Y  ║
+║        ██╔════╝ ██║ ██╔════╝   S P A C E _ F L I G H T _ W I D G E T . P Y   ║
 ║        ███████╗ ██║ ██║  ███╗                                                ║
 ║        ╚════██║ ██║ ██║   ██║  Starfield Intelligent Gallery                 ║
 ║        ███████║ ██║ ╚██████╔╝                                                ║
-║        ╚══════╝ ╚═╝  ╚═════╝   "Through the dark between the stars."        ║
+║        ╚══════╝ ╚═╝  ╚═════╝   "Through the dark between the stars."         ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  space_flight_widget.py                                        ║
 ║  Location   :  C:\SIG\ui\space_flight_widget.py                              ║
@@ -15,44 +15,44 @@ r"""
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  CINEMATIC SEQUENCE  (~22 seconds total)                                     ║
 ║                                                                              ║
-║  Phase 0  BLACK     (2.5 s)  Pure black — The Crossing just ended.          ║
-║  Phase 1  PINPOINT  (1.5 s)  One star appears at screen center, grows.      ║
-║  Phase 2  WARP      (10 s)   250-star rush outward. 4 nebulae sweep past.   ║
-║                               Cyan nebula #3 — we FLY THROUGH IT.           ║
-║  Phase 3  APPROACH  (3 s)    JOURNEY panel grows from a distant pinpoint.   ║
-║                               Stars decelerate — we are arriving.           ║
-║  Phase 4  GLYPH     (3.5 s)  6 Varuun SVG glyphs dart in from deep space.  ║
-║                               Each tumbles (rotating) then LANDS on panel.  ║
-║                               "JOURNEY" coalesces letter-by-letter from     ║
-║                               the energy of the settled glyphs.             ║
-║  Phase 5  HOLD      (1.5 s)  Panel glows. flight_finished emitted.          ║
+║  Phase 0  BLACK     (2.5 s)  Pure black — The Crossing just ended.           ║
+║  Phase 1  PINPOINT  (1.5 s)  One star appears at screen center, grows.       ║
+║  Phase 2  WARP      (10 s)   250-star rush outward. 4 nebulae sweep past.    ║
+║                               Cyan nebula #3 — we FLY THROUGH IT.            ║
+║  Phase 3  APPROACH  (3 s)    JOURNEY panel grows from a distant pinpoint.    ║
+║                               Stars decelerate — we are arriving.            ║
+║  Phase 4  GLYPH     (3.5 s)  6 Varuun SVG glyphs dart in from deep space.    ║
+║                               Each tumbles (rotating) then LANDS on panel.   ║
+║                               "JOURNEY" coalesces letter-by-letter from      ║
+║                               the energy of the settled glyphs.              ║
+║  Phase 5  HOLD      (1.5 s)  Panel glows. flight_finished emitted.           ║
 ║                                                                              ║
 ║  3D STARFIELD ENGINE                                                         ║
-║    True perspective projection: screen_pos = focal * world_pos / z          ║
-║    Each star has its OWN z-velocity — true parallax depth, not a painted    ║
-║    canvas scrolling by. Closer stars rush past; distant ones drift slowly.  ║
+║    True perspective projection: screen_pos = focal * world_pos / z           ║
+║    Each star has its OWN z-velocity — true parallax depth, not a painted     ║
+║    canvas scrolling by. Closer stars rush past; distant ones drift slowly.   ║
 ║    Spectral color palette (real stellar temperature classes):                ║
-║      O/B class  — Blue-white  #B8D4FF  (Rigel, Spica)                       ║
-║      A class    — Pure white  #FFFFFF  (Sirius, Vega)  weighted x2          ║
-║      F class    — Yel-white   #FFF4D6  (Procyon)                            ║
-║      G class    — Gold        #FFD97D  (Sun-like)                           ║
-║      K class    — Orange      #FFAA55  (Arcturus)                           ║
-║      M class    — Deep red    #FF4422  (Betelgeuse)                         ║
-║      Varuun     — Cyan        #44FFEE  (rare O-type accent)                 ║
+║      O/B class  — Blue-white  #B8D4FF  (Rigel, Spica)                        ║
+║      A class    — Pure white  #FFFFFF  (Sirius, Vega)  weighted x2           ║
+║      F class    — Yel-white   #FFF4D6  (Procyon)                             ║
+║      G class    — Gold        #FFD97D  (Sun-like)                            ║
+║      K class    — Orange      #FFAA55  (Arcturus)                            ║
+║      M class    — Deep red    #FF4422  (Betelgeuse)                          ║
+║      Varuun     — Cyan        #44FFEE  (rare O-type accent)                  ║
 ║    Trail length grows with proximity AND individual star speed.              ║
-║    Stars range 1 px pinpoints to 4 px bright orbs.                         ║
+║    Stars range 1 px pinpoints to 4 px bright orbs.                           ║
 ║                                                                              ║
 ║  TECHNICAL CREDITS                                                           ║
 ║    3D perspective starfield engine designed by Microsoft Copilot             ║
-║    (AI Engineer Colleague) — the only starfield where even Star Trek        ║
+║    (AI Engineer Colleague) — the only starfield where even Star Trek         ║
 ║    captains would grab a railing.                                            ║
 ║                                                                              ║
-║  VARUUN GLYPH FILES  (C:\SIG\intro\assets\glyphs\)                          ║
-║    glyph_hex.svg     glyph_eye.svg     glyph_sigma.svg                      ║
-║    glyph_diamond.svg glyph_arrow.svg   glyph_cross.svg                      ║
-║    Tinted cobalt #3B78E7 via SourceIn. Fallback: procedural hexagons.       ║
+║  VARUUN GLYPH FILES  (C:\SIG\intro\assets\glyphs\)                           ║
+║    glyph_hex.svg     glyph_eye.svg     glyph_sigma.svg                       ║
+║    glyph_diamond.svg glyph_arrow.svg   glyph_cross.svg                       ║
+║    Tinted cobalt #3B78E7 via SourceIn. Fallback: procedural hexagons.        ║
 ║                                                                              ║
-║  KEYBOARD   Space / Enter / Escape — skip to flight_finished immediately    ║
+║  KEYBOARD   Space / Enter / Escape — skip to flight_finished immediately     ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 

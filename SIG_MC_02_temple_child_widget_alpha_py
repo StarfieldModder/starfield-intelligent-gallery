@@ -1,27 +1,27 @@
 r"""
-╔══════════════════════════════════════════════════════════════════════════════╗
-║   ███████╗ ██╗  ██████╗      T E M P L E _ C H I L D _ A L P H A . P Y     ║
+╔═════════════════════════════════════════════════════════════════════════════╗
+║   ███████╗ ██╗  ██████╗      T E M P L E _ C H I L D _ A L P H A . P Y      ║
 ║   ██╔════╝ ██║ ██╔════╝      JOURNEY  ·  ARCHIVE  —  Panel Host             ║
 ║   ███████╗ ██║ ██║  ███╗                                                    ║
 ║   ╚════██║ ██║ ██║   ██║     TempleConsole  ·  PySide6                      ║
 ║   ███████║ ██║ ╚██████╔╝                                                    ║
-║   ╚══════╝ ╚═╝  ╚═════╝      "Alpha terminal.  First to rise."             ║
-╠══════════════════════════════════════════════════════════════════════════════╣
+║   ╚══════╝ ╚═╝  ╚═════╝      "Alpha terminal.  First to rise."              ║
+╠═════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  temple_child_widget_alpha.py                                 ║
 ║  Location   :  C:\SIG\temple_child_widget_alpha.py                          ║
 ║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                    ║
 ║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                    ║
-║  Version    :  1.0.0  —  2026.07.07                                          ║
-╠══════════════════════════════════════════════════════════════════════════════╣
+║  Version    :  1.0.0  —  2026.07.07                                         ║
+╠═════════════════════════════════════════════════════════════════════════════╣
 ║  PANEL IDs (from sig_launcher.py / CarrierDeck)                             ║
-║    1 = JOURNEY                                                               ║
+║    1 = JOURNEY                                                              ║
 ║    2 = ARCHIVE  ←  Mission Controller lives here                            ║
 ║                                                                             ║
 ║  USAGE  (from carrier_deck.py or cosmic_choice_panel.py)                    ║
 ║    from temple_child_widget_alpha import TempleChildWidgetAlpha             ║
 ║    widget = TempleChildWidgetAlpha(panel_id=2, parent=self)                 ║
 ║    widget.show()                                                            ║
-╚══════════════════════════════════════════════════════════════════════════════╝
+╚═════════════════════════════════════════════════════════════════════════════╝
 """
 
 from __future__ import annotations

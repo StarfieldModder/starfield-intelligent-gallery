@@ -9,22 +9,14 @@ r"""
 ║                                    a single line of code."                   ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  main.py                                                       ║
-║  Location   :  C:\\SIG\\main.py                                              ║
-║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                     ║
-║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                     ║
-║  Version    :  2026.07.03 — Mission Control Edition                          ║
-╠══════════════════════════════════════════════════════════════════════════════╣
-║  WHAT THIS FILE IS                                                           ║
-║                                                                              ║
-║  Mission Control — the single authoritative entry point for the SIG app.     ║
-║  It parses launch flags, selects the correct flight path, and hands off to   ║
-║  the specialist modules (sig_launcher, Carrier Deck, headless renderer).     ║
+║  Location   :  C:\SIG\main.py                                                ║
+║  Author     :  Mark J. Latsha                                                ║
+║  Co-Author  :  Copilot                                                       ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
 import argparse
 import sys
-import os
 
 def main():
     parser = argparse.ArgumentParser(
@@ -47,20 +39,30 @@ def main():
 
     args = parser.parse_args()
 
+    # ------------------------------------------------------------
+    # 1. Headless render mode
+    # ------------------------------------------------------------
     if args.render:
         from intro.sig_main_intro import render_intro
         render_intro(args.output, args.width, args.height,
                      args.fps, args.duration)
         return
 
+    # ------------------------------------------------------------
+    # 2. Skip intro → go directly to Carrier Deck
+    # ------------------------------------------------------------
     if args.skip_intro:
-        from carrier_deck import CarrierDeck
+        from ui.carrier_deck import CarrierDeck
         deck = CarrierDeck(debug=args.debug)
         deck.run()
         return
 
+    # ------------------------------------------------------------
+    # 3. Full cinematic chain (default)
+    # ------------------------------------------------------------
     from sig_launcher import launch_sig
     launch_sig(debug=args.debug)
+
 
 if __name__ == "__main__":
     main()

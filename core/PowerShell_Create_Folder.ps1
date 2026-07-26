@@ -1,0 +1,1 @@
+# create folder if missingNew-Item -ItemType Directory -Path "C:\SIG\core" -Force# open Notepad to paste the stub and save as diagnostic_reporter.pynotepad "C:\SIG\core\diagnostic_reporter.py"

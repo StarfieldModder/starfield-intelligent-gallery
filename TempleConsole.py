@@ -344,7 +344,7 @@ if __name__ == "__main__":
     # 2. Instantiate Temple Console
     # ------------------------------------------------------------
     console = TempleConsole()
-    console.setWindowTitle("Starfield Intelligent Gallery — Temple Console")
+    console.setWindowTitle("Intelligent Gallery — Temple Console")
 
     # ------------------------------------------------------------
     # 3. Cinematic Window Flags

@@ -1,31 +1,31 @@
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║   ███████╗ ██╗  ██████╗      T E M P L E _ C H I L D _ B E T A . P Y       ║
-║   ██╔════╝ ██║ ██╔════╝      ARTIFACTS  ·  COMPANIONS  —  Panel Host        ║
-║   ███████╗ ██║ ██║  ███╗                                                    ║
-║   ╚════██║ ██║ ██║   ██║     TempleConsole  ·  PySide6                      ║
-║   ███████║ ██║ ╚██████╔╝                                                    ║
-║   ╚══════╝ ╚═╝  ╚═════╝      "Beta terminal.  Second to rise."             ║
+║   ███████╗ ██╗  ██████╗      T E M P L E _ C H I L D _ B E T A . P Y         ║
+║   ██╔════╝ ██║ ██╔════╝      ARTIFACTS  ·  COMPANIONS  —  Panel Host         ║
+║   ███████╗ ██║ ██║  ███╗                                                     ║
+║   ╚════██║ ██║ ██║   ██║     TempleConsole  ·  PySide6                       ║
+║   ███████║ ██║ ╚██████╔╝                                                     ║
+║   ╚══════╝ ╚═╝  ╚═════╝      "Beta terminal.  Second to rise."               ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  File       :  temple_child_widget_beta.py                                  ║
-║  Location   :  C:\SIG\temple_child_widget_beta.py                           ║
-║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                    ║
-║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                    ║
+║  File       :  temple_child_widget_beta.py                                   ║
+║  Location   :  C:\SIG\temple_child_widget_beta.py                            ║
+║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                     ║
+║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                     ║
 ║  Version    :  1.0.0  —  2026.07.07                                          ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  PANEL IDs (from sig_launcher.py / CarrierDeck)                             ║
+║  PANEL IDs (from sig_launcher.py / CarrierDeck)                              ║
 ║    3 = ARTIFACTS                                                             ║
 ║    4 = COMPANIONS                                                            ║
 ║    5 = COSMIC CHOICE                                                         ║
-║                                                                             ║
-║  OPTIONAL:  Optionally embeds Mission Controller as an "Image Vault" tab    ║
-║             inside the ARTIFACTS panel (panel_id=3) when                    ║
+║                                                                              ║
+║  OPTIONAL:  Optionally embeds Mission Controller as an "Image Vault" tab     ║
+║             inside the ARTIFACTS panel (panel_id=3) when                     ║
 ║             embed_mc_in_artifacts=True is passed to the constructor.         ║
-║                                                                             ║
-║  USAGE  (from carrier_deck.py or cosmic_choice_panel.py)                    ║
-║    from temple_child_widget_beta import TempleChildWidgetBeta               ║
-║    widget = TempleChildWidgetBeta(panel_id=3, parent=self)                  ║
-║    widget.show()                                                            ║
+║                                                                              ║
+║  USAGE  (from carrier_deck.py or cosmic_choice_panel.py)                     ║
+║    from temple_child_widget_beta import TempleChildWidgetBeta                ║
+║    widget = TempleChildWidgetBeta(panel_id=3, parent=self)                   ║
+║    widget.show()                                                             ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 

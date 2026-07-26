@@ -1,12 +1,12 @@
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                                                                              ║
-║        ███████╗ ██╗  ██████╗   R E L I C S _ M O D E . P Y                  ║
-║        ██╔════╝ ██║ ██╔════╝   SIG Relic Archive                            ║
+║        ███████╗ ██╗  ██████╗   R E L I C S _ M O D E . P Y                   ║
+║        ██╔════╝ ██║ ██╔════╝   SIG Relic Archive                             ║
 ║        ███████╗ ██║ ██║  ███╗                                                ║
 ║        ╚════██║ ██║ ██║   ██║  Starfield Intelligent Gallery                 ║
 ║        ███████║ ██║ ╚██████╔╝                                                ║
-║        ╚══════╝ ╚═╝  ╚═════╝   "Artifacts whisper when the room is quiet."  ║
+║        ╚══════╝ ╚═╝  ╚═════╝   "Artifacts whisper when the room is quiet."   ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  relics_mode.py                                                ║
 ║  Location   :  C:\\SIG\\relics_mode.py                                       ║
@@ -14,12 +14,12 @@ r"""
 ║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                     ║
 ║  Version    :  2026.07.03 — Relics Mode Edition                              ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  WHAT THIS FILE IS                                                            ║
+║  WHAT THIS FILE IS                                                           ║
 ║                                                                              ║
-║  The SIG Relics Chamber:                                                      ║
-║    • Receives control from Cosmic Choice Panel                                ║
-║    • Displays relic entries (future: metadata, playback, holograms)           ║
-║    • Integrates Nebula Module for cosmic ambience                             ║
+║  The SIG Relics Chamber:                                                     ║
+║    • Receives control from Cosmic Choice Panel                               ║
+║    • Displays relic entries (future: metadata, playback, holograms)          ║
+║    • Integrates Nebula Module for cosmic ambience                            ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 

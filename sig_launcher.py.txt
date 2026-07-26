@@ -3,7 +3,7 @@ r"""
 ║        ███████╗ ██╗  ██████╗      S I G _ L A U N C H E R . P Y              ║
 ║        ██╔════╝ ██║ ██╔════╝      GUI Front Door — Full Cinematic Chain      ║
 ║        ███████╗ ██║ ██║  ███╗                                                ║
-║        ╚════██║ ██║ ██║   ██║     Starfield Intelligent Gallery              ║
+║        ╚════██║ ██║ ██║   ██║     Intelligent Gallery                        ║
 ║        ███████║ ██║ ╚██████╔╝                                                ║
 ║        ╚══════╝ ╚═╝  ╚═════╝      "Open the hatch. Let the story begin."     ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
@@ -11,7 +11,7 @@ r"""
 ║  Location   :  C:\SIG\sig_launcher.py                                        ║
 ║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                     ║
 ║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                     ║
-║  Version    :  2026.07.10 — Full Cinematic Chain Edition                     ║
+║  Version    :  2026.07.23 — Full Cinematic Chain Edition (Patched 15:37 PDT) ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  FULL SEQUENCE                                                               ║
 ║    1. IntroPanelWidget    Title fade + The Crossing video (29.9 s)           ║
@@ -28,11 +28,9 @@ r"""
 ║    • Every step wrapped in try/except — no silent black freezes              ║
 ║    • SpaceFlightWidget failure skips straight to CarrierDeck                 ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  NOTES                                                                       ║
-║    • IntroPanelWidget now hands off to the launcher; launcher creates the    ║
-║      SpaceFlightWidget and calls show_flight().                              ║
-║    • Global ESC event filter installed so Escape quits cleanly.              ║
-║    • Defensive duplicate-check prevents double flight launches.              ║
+║  PATCH NOTES (2026.07.23 — 15:37 PDT)                                        ║
+║    • Added `debug=False` parameter to launch_sig() to match main.py          ║
+║    • No logic changes — cinematic chain preserved exactly                    ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
@@ -48,7 +46,7 @@ from ui.space_flight_widget  import SpaceFlightWidget
 from cosmic_choice_panel     import CosmicChoicePanel
 
 
-def launch_sig() -> None:
+def launch_sig(debug=False) -> None:
     """Full SIG cinematic launch sequence."""
     app = QApplication(sys.argv)
 
@@ -64,25 +62,19 @@ def launch_sig() -> None:
             self._app = app
 
         def eventFilter(self, watched, event):
-            # Catch KeyPress events and handle Escape
             if event.type() == QEvent.Type.KeyPress:
                 if event.key() == Qt.Key.Key_Escape:
                     print("[SIG Launcher] ESC pressed — shutting down.")
-                    # Cleanly stop the Qt event loop
                     self._app.quit()
                     return True
             return super().eventFilter(watched, event)
 
-    # Install the filter on the application so ESC is caught globally
     esc_filter = EscEventFilter(app)
     app.installEventFilter(esc_filter)
 
-    # All top-level widgets stored here — prevents Python garbage collection
     _alive: list = []
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # STEP 1 — IntroPanelWidget: title fade + The Crossing
-    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 1 — IntroPanelWidget
     intro = IntroPanelWidget()
     _alive.append(intro)
 
@@ -92,28 +84,24 @@ def launch_sig() -> None:
         _launch_flight()
 
     def _launch_flight() -> None:
-        # ── STEP 2 — SpaceFlightWidget ────────────────────────────────────
-        # Defensive: if a SpaceFlightWidget is already alive, skip duplicate launch.
         for w in _alive:
             if isinstance(w, SpaceFlightWidget):
-                print("[SIG Launcher] _launch_flight called but SpaceFlightWidget already running — ignoring duplicate.")
+                print("[SIG Launcher] SpaceFlightWidget already running — ignoring duplicate.")
                 return
 
         try:
             flight = SpaceFlightWidget()
             _alive.append(flight)
             flight.flight_finished.connect(on_flight_finished)
-            # Use the widget's public API to start the cinematic
             flight.show_flight()
-            print("[SIG Launcher]  ✦ Space Flight — engines lit.")
+            print("[SIG Launcher] ✦ Space Flight — engines lit.")
         except Exception as exc:
-            print(f"[SIG Launcher]  SpaceFlightWidget failed: {exc}")
+            print(f"[SIG Launcher] SpaceFlightWidget failed: {exc}")
             traceback.print_exc()
-            print("[SIG Launcher]  Skipping cinematic — going straight to Carrier Deck.")
-            on_flight_finished()   # graceful skip
+            print("[SIG Launcher] Skipping cinematic — going straight to Carrier Deck.")
+            on_flight_finished()
 
     def on_flight_finished() -> None:
-        # Cleanly close the flight widget
         for w in list(_alive):
             if isinstance(w, SpaceFlightWidget):
                 try:
@@ -122,19 +110,15 @@ def launch_sig() -> None:
                 except Exception:
                     pass
 
-        # ── STEP 3 — CarrierDeck ──────────────────────────────────────────
         try:
             deck = CarrierDeck()
             _alive.append(deck)
             deck.panel_selected.connect(on_panel_selected)
             deck.showFullScreen()
-
-            # begin_materialize() fires 500 ms after deck is visible
             QTimer.singleShot(500, deck.begin_materialize)
-            print("[SIG Launcher]  ✦ Carrier Deck online — panels materialising.")
-
+            print("[SIG Launcher] ✦ Carrier Deck online — panels materialising.")
         except Exception as exc:
-            print(f"[SIG Launcher]  CarrierDeck failed: {exc}")
+            print(f"[SIG Launcher] CarrierDeck failed: {exc}")
             traceback.print_exc()
             _show_error("Carrier Deck", exc)
             app.quit()
@@ -148,15 +132,14 @@ def launch_sig() -> None:
             5: "COSMIC CHOICE",
         }
         name = _PANEL_NAMES.get(panel_id, f"Panel {panel_id}")
-        print(f"[SIG Launcher]  ✦ {name} selected — Cosmic Choice Panel.")
+        print(f"[SIG Launcher] ✦ {name} selected — Cosmic Choice Panel.")
 
-        # ── STEP 4 — CosmicChoicePanel ────────────────────────────────────
         try:
             choice = CosmicChoicePanel()
             _alive.append(choice)
             choice.showFullScreen()
         except Exception as exc:
-            print(f"[SIG Launcher]  CosmicChoicePanel failed: {exc}")
+            print(f"[SIG Launcher] CosmicChoicePanel failed: {exc}")
             traceback.print_exc()
             _show_error("Cosmic Choice Panel", exc)
 
@@ -171,7 +154,6 @@ def launch_sig() -> None:
         )
         msg.exec()
 
-    # ── Begin the sequence ────────────────────────────────────────────────
     intro.intro_finished.connect(on_intro_finished)
     intro.showFullScreen()
     intro.show_panel()
@@ -181,3 +163,4 @@ def launch_sig() -> None:
 
 if __name__ == "__main__":
     launch_sig()
+

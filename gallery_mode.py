@@ -1,27 +1,27 @@
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                                                                              ║
-║        ███████╗ ██╗  ██████╗   G A L L E R Y _ M O D E . P Y                ║
-║        ██╔════╝ ██║ ██╔════╝   SIG Artifact Gallery                         ║
+║        ███████╗ ██╗  ██████╗   G A L L E R Y _ M O D E . P Y                 ║
+║        ██╔════╝ ██║ ██╔════╝   SIG Artifact Gallery                          ║
 ║        ███████╗ ██║ ██║  ███╗                                                ║
 ║        ╚════██║ ██║ ██║   ██║  Starfield Intelligent Gallery                 ║
 ║        ███████║ ██║ ╚██████╔╝                                                ║
-║        ╚══════╝ ╚═╝  ╚═════╝   "Where artifacts line up and tell their      ║
+║        ╚══════╝ ╚═╝  ╚═════╝   "Where artifacts line up and tell their       ║
 ║                                 stories in silence."                         ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  gallery_mode.py                                               ║
 ║  Location   :  C:\\SIG\\gallery_mode.py                                      ║
 ║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                     ║
 ║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                     ║
-║  Version    :  2026.07.03 — Gallery Mode Edition                             ║
+║  Version    :  2026.07.23 — Gallery Mode Edition                             ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  WHAT THIS FILE IS                                                            ║
+║  WHAT THIS FILE IS                                                           ║
 ║                                                                              ║
-║  The primary visual gallery surface:                                          ║
-║    • Receives control from Cosmic Choice Panel                                ║
-║    • Displays a grid of artifacts / thumbnails                                ║
-║    • Prepares future detail views / playback                                  ║
-║    • Integrates Nebula Module for cosmic ambience                             ║
+║  The primary visual gallery surface:                                         ║
+║    • Receives control from Cosmic Choice Panel                               ║
+║    • Displays a grid of artifacts / thumbnails                               ║
+║    • Prepares future detail views / playback                                 ║
+║    • Integrates Nebula Module for cosmic ambience                            ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 

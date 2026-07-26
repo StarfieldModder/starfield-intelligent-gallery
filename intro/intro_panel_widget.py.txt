@@ -1,12 +1,12 @@
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                                                                              ║
-║        ███████╗ ██╗  ██████╗   I N T R O _ P A N E L _ W I D G E T . P Y    ║
-║        ██╔════╝ ██║ ██╔════╝   Cinematic Title → Cached Video Engine        ║
+║        ███████╗ ██╗  ██████╗   I N T R O _ P A N E L _ W I D G E T . P Y     ║
+║        ██╔════╝ ██║ ██╔════╝   Cinematic Title → Cached Video Engine         ║
 ║        ███████╗ ██║ ██║  ███╗                                                ║
 ║        ╚════██║ ██║ ██║   ██║  Starfield Intelligent Gallery                 ║
 ║        ███████║ ██║ ╚██████╔╝                                                ║
-║        ╚══════╝ ╚═╝  ╚═════╝   "The moment SIG opens its eyes."             ║
+║        ╚══════╝ ╚═╝  ╚═════╝   "The moment SIG opens its eyes."              ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  intro_panel_widget.py                                         ║
 ║  Location   :  C:\\SIG\\intro\\intro_panel_widget.py                         ║
@@ -14,24 +14,24 @@ r"""
 ║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                     ║
 ║  Version    :  2026.07.03 — Cached Intro Engine Edition                      ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  WHAT THIS FILE IS                                                            ║
+║  WHAT THIS FILE IS                                                           ║
 ║                                                                              ║
-║  Controls the SIG intro sequence:                                             ║
-║    • Fade-in of the SIG title                                                 ║
-║    • Silent caching of “The Crossing”                                         ║
-║    • Fade-out of the title                                                    ║
-║    • Instant playback of the video                                            ║
-║    • Hand-off to Carrier Deck after video ends                                ║
+║  Controls the SIG intro sequence:                                            ║
+║    • Fade-in of the SIG title                                                ║
+║    • Silent caching of “The Crossing”                                        ║
+║    • Fade-out of the title                                                   ║
+║    • Instant playback of the video                                           ║
+║    • Hand-off to Carrier Deck after video ends                               ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  SEQUENCE                                                                     ║
+║  SEQUENCE                                                                    ║
 ║                                                                              ║
-║    1. Black                                                                   ║
-║    2. Title fades in (3 seconds)                                              ║
-║    3. Video loads silently (muted + hidden)                                   ║
-║    4. Video caches (decoder ready)                                            ║
-║    5. Title fades out (0.5 seconds)                                           ║
-║    6. Video begins instantly                                                  ║
-║    7. On completion → Carrier Deck                                            ║
+║    1. Black                                                                  ║
+║    2. Title fades in (3 seconds)                                             ║
+║    3. Video loads silently (muted + hidden)                                  ║
+║    4. Video caches (decoder ready)                                           ║
+║    5. Title fades out (0.5 seconds)                                          ║
+║    6. Video begins instantly                                                 ║
+║    7. On completion → Carrier Deck                                           ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 

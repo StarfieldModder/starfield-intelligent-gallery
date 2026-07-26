@@ -1,0 +1,1 @@
+python -m companion.test_harness

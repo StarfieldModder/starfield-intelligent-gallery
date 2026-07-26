@@ -1,20 +1,20 @@
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                                                                              ║
-║        ███████╗ ██╗  ██████╗   S I G _ M A I N _ I N T R O . P Y            ║
-║        ██╔════╝ ██║ ██╔════╝   Headless Intro Renderer (Cached Video)       ║
+║        ███████╗ ██╗  ██████╗   S I G _ M A I N _ I N T R O . P Y             ║
+║        ██╔════╝ ██║ ██╔════╝   Headless Intro Renderer (Cached Video)        ║
 ║        ███████╗ ██║ ██║  ███╗                                                ║
 ║        ╚════██║ ██║ ██║   ██║  Starfield Intelligent Gallery                 ║
 ║        ███████║ ██║ ╚██████╔╝                                                ║
-║        ╚══════╝ ╚═╝  ╚═════╝   "Intro as artifact, not just playback."      ║
+║        ╚══════╝ ╚═╝  ╚═════╝   "Intro as artifact, not just playback."       ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  sig_main_intro.py                                             ║
 ║  Location   :  C:\\SIG\\intro\\sig_main_intro.py                             ║
 ║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                     ║
 ║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                     ║
-║  Version    :  2026.07.03 — Headless Intro Edition                           ║
+║  Version    :  2026.07.23 — Headless Intro Edition                           ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  WHAT THIS FILE IS                                                            ║
+║  WHAT THIS FILE IS                                                           ║
 ║                                                                              ║
 ║  Provides a headless render path for the SIG intro:                          ║
 ║    • Uses the same timing as the GUI intro                                   ║

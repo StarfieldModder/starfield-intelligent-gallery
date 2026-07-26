@@ -1,42 +1,42 @@
 r"""
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║        ███████╗ ██╗  ██████╗                                                 ║
-║        ██╔════╝ ██║ ██╔════╝   S I G _ D I A G N O S T I C S . P Y         ║
+║        ██╔════╝ ██║ ██╔════╝   S I G _ D I A G N O S T I C S . P Y           ║
 ║        ███████╗ ██║ ██║  ███╗                                                ║
 ║        ╚════██║ ██║ ██║   ██║  Starfield Intelligent Gallery                 ║
 ║        ███████║ ██║ ╚██████╔╝                                                ║
-║        ╚══════╝ ╚═╝  ╚═════╝   "The Intelligent Gallery checks itself."     ║
+║        ╚══════╝ ╚═╝  ╚═════╝   "The Intelligent Gallery checks itself."      ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  sig_diagnostics.py                                            ║
-║  Location   :  C:\SIG\sig_diagnostics.py                                    ║
+║  Location   :  C:\SIG\sig_diagnostics.py                                     ║
 ║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                     ║
 ║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                     ║
-║  Version    :  2026.07.05 — Check Engine Light Edition                       ║
+║  Version    :  2026.07.23 — Check Engine Light Edition                       ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  WHAT THIS FILE IS                                                           ║
 ║                                                                              ║
-║  The SIG "Check Engine Light" — an independent health-check that tests      ║
-║  every subsystem before the cinematic launch sequence begins.               ║
+║  The SIG "Check Engine Light" — an independent health-check that tests       ║
+║  every subsystem before the cinematic launch sequence begins.                ║
 ║                                                                              ║
 ║  Run standalone at any time:                                                 ║
-║    .venv\Scripts\python.exe sig_diagnostics.py                              ║
+║    .venv\Scripts\python.exe sig_diagnostics.py                               ║
 ║                                                                              ║
-║  Or import and call from sig_launcher.py:                                   ║
+║  Or import and call from sig_launcher.py:                                    ║
 ║    from sig_diagnostics import run_diagnostics                               ║
-║    if not run_diagnostics(silent=False): sys.exit(1)                        ║
+║    if not run_diagnostics(silent=False): sys.exit(1)                         ║
 ║                                                                              ║
-║  TESTS (each returns PASS / WARN / FAIL)                                    ║
-║    01  Python version (≥ 3.10)                                              ║
+║  TESTS (each returns PASS / WARN / FAIL)                                     ║
+║    01  Python version (≥ 3.10)                                               ║
 ║    02  PySide6 core                                                          ║
 ║    03  PySide6.QtMultimedia                                                  ║
 ║    04  PySide6.QtSvg                                                         ║
 ║    05  PySide6.QtWidgets + QApplication constructs                           ║
 ║    06  Video file found in search paths                                      ║
 ║    07  Varuun SVG glyph files (6 of 6)                                       ║
-║    08  ui.intro_panel_widget  → IntroPanelWidget                            ║
-║    09  ui.space_flight_widget → SpaceFlightWidget                           ║
+║    08  ui.intro_panel_widget  → IntroPanelWidget                             ║
+║    09  ui.space_flight_widget → SpaceFlightWidget                            ║
 ║    10  ui.carrier_deck        → CarrierDeck                                  ║
-║    11  cosmic_choice_panel    → CosmicChoicePanel  (import only)            ║
+║    11  cosmic_choice_panel    → CosmicChoicePanel  (import only)             ║
 ║    12  gallery_mode           → GalleryMode                                  ║
 ║    13  relics_mode            → RelicsMode                                   ║
 ║    14  companions_mode        → CompanionMode                                ║

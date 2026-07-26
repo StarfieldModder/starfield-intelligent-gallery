@@ -1,7 +1,7 @@
 # ================================================================
 #  Starfield Intelligent Gallery (SIG)
 #  Main Window — TempleConsole Integration
-#  File: main_window.py
+#  File: main_window.py      07/23/26
 #
 #  Author: Mark J. Latsha
 #  Co‑Author: Microsoft Copilot

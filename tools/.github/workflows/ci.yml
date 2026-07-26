@@ -1,17 +1,88 @@
+name: SIG Continuous Integration
 
----
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+  workflow_dispatch:
 
-### 3) `docs/relics-and-artifacts.md`  
-**Place:** `docs/relics-and-artifacts.md`  
+jobs:
+  sig-ci:
+    runs-on: ubuntu-latest
 
-```markdown
-# ================================================================
-File: docs/relics-and-artifacts.md
-Location: docs/
-Author: Mark J. Latsha
-Co-Author: Microsoft Copilot
-Created: 2026-05-27
-Description:
-  Canonical documentation for Relics & Artifacts: definitions,
-  gating rules, promotion workflow, privacy, and data model.
-===============================================================
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install SIG dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff pytest coverage
+
+    - name: Validate SIG folder structure
+      run: python tools/validate_structure.py
+
+    - name: Validate cinematic headers
+      run: python tools/validate_headers.py
+
+    - name: Validate relic & artifact documentation
+      run: python tools/validate_relics.py
+
+    - name: Generate SIG dependency graph
+      run: python tools/generate_dependency_graph.py
+
+    - name: Build SIG documentation
+      run: python tools/build_docs.py
+
+    - name: Run gating engine sanity check
+      run: python sig/gating_engine.py
+
+    - name: Run SIG launcher (CI mode)
+      run: python sig_launcher.py --ci
+
+    - name: Lint SIG codebase (ruff)
+      run: python tools/lint.py
+
+    - name: Run SIG unit tests
+      run: python tools/run_tests.py
+
+    - name: Run coverage report
+      run: python tools/run_coverage.py
+
+    - name: Profile SIG modules
+      run: python tools/profile_modules.py
+
+    - name: Check SIG asset integrity
+      run: python tools/check_assets.py
+
+    - name: Validate Temple Artifact animation
+      run: python tools/validate_animation.py
+
+    - name: Generate SIG performance dashboard
+      run: python tools/performance_dashboard.py
+
+    - name: Run SIG artifact unlock simulator
+      run: python tools/artifact_simulator.py
+
+    - name: Preview Temple Artifact animation
+      run: python tools/animation_previewer.py
+
+    - name: Generate SIG dependency heatmap
+      run: python tools/dependency_heatmap.py
+
+
+    - name: Upload SIG artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: sig-ci-artifacts
+        path: |
+          sig_dependency_graph.txt
+          docs/auto-generated-modules.md
+          sig_profile.prof
+          htmlcov/

@@ -1,18 +1,18 @@
 r"""
-╔══════════════════════════════════════════════════════════════════════════════╗
-║        ███████╗ ██╗  ██████╗      S I G _ M C _ I N T E G R A T I O N      ║
+╔═════════════════════════════════════════════════════════════════════════════╗
+║        ███████╗ ██╗  ██████╗      S I G _ M C _ I N T E G R A T I O N       ║
 ║        ██╔════╝ ██║ ██╔════╝      Mission Controller → TempleConsole Hook   ║
 ║        ███████╗ ██║ ██║  ███╗                                               ║
 ║        ╚════██║ ██║ ██║   ██║     Starfield Intelligent Gallery             ║
 ║        ███████║ ██║ ╚██████╔╝                                               ║
-║        ╚══════╝ ╚═╝  ╚═════╝      "One import. The archive wakes up."      ║
-╠══════════════════════════════════════════════════════════════════════════════╣
+║        ╚══════╝ ╚═╝  ╚═════╝      "One import. The archive wakes up."       ║
+╠═════════════════════════════════════════════════════════════════════════════╣
 ║  File       :  sig_mission_controller_integration.py                        ║
 ║  Location   :  C:\SIG\sig_mission_controller_integration.py                 ║
 ║  Author     :  Mark J. Latsha  (StarfieldModder / Games)                    ║
 ║  Co-Author  :  Microsoft Copilot (AI Engineer Colleague)                    ║
-║  Version    :  1.0.0  —  2026.07.07                                          ║
-╠══════════════════════════════════════════════════════════════════════════════╣
+║  Version    :  1.0.0  —  2026.07.07                                         ║
+╠═════════════════════════════════════════════════════════════════════════════╣
 ║  PURPOSE                                                                    ║
 ║    Drop-in integration module for connecting the SIG Mission Controller     ║
 ║    to any existing TempleConsole panel (CarrierDeck, CosmicChoicePanel,     ║
@@ -21,13 +21,13 @@ r"""
 ║  USAGE — Option A: as a standalone tab widget                               ║
 ║    from sig_mission_controller_integration import create_mc_widget          ║
 ║    mc = create_mc_widget(parent=self)                                       ║
-║    self.tab_widget.addTab(mc, "⬡  ARCHIVE")                                ║
+║    self.tab_widget.addTab(mc, "⬡  ARCHIVE")                                 ║
 ║                                                                             ║
 ║  USAGE — Option B: full panel factory with error handling                   ║
 ║    panel = MCIntegration.build_panel(parent=self)                           ║
 ║    layout.addWidget(panel)                                                  ║
 ║                                                                             ║
-║  USAGE — Option C: register into sig_launcher.py CarrierDeck flow          ║
+║  USAGE — Option C: register into sig_launcher.py CarrierDeck flow           ║
 ║    See _register_with_carrier_deck() docstring below.                       ║
 ║                                                                             ║
 ║  INTEGRATION TARGETS (existing SIG files):                                  ║
@@ -35,7 +35,7 @@ r"""
 ║    • temple_child_widget_beta.py   — Beta tab host                          ║
 ║    • cosmic_choice_panel.py        — CosmicChoicePanel ARCHIVE path         ║
 ║    • carrier_deck.py               — CarrierDeck ARCHIVE panel slot         ║
-╚══════════════════════════════════════════════════════════════════════════════╝
+╚═════════════════════════════════════════════════════════════════════════════╝
 """
 
 from __future__ import annotations
