@@ -36,6 +36,7 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit
 from PySide6.QtGui import QFont
+from .restore_panel import RestorePanel
 
 # ---------------------------------------------------------------------------
 # Updated Intelligence Gallery paths
@@ -50,7 +51,7 @@ class RecoveryDashboard(QWidget):
     The holographic Recovery Dashboard for the Intelligence Gallery.
     Provides:
         • Integrity scan of IG core modules
-        • Backup verification (C:\IG and D:\IG)
+        • Backup verification (C:\\IG and D:\\IG)
         • GitHub sync status
     """
 
@@ -62,6 +63,7 @@ class RecoveryDashboard(QWidget):
 
         layout = QVBoxLayout()
         self.setLayout(layout)
+        self.restore_panel = None
 
         title = QLabel("IG Recovery Dashboard")
         title.setFont(QFont("Consolas", 18, QFont.Bold))
@@ -82,6 +84,10 @@ class RecoveryDashboard(QWidget):
         git_btn = QPushButton("Check GitHub Sync")
         git_btn.clicked.connect(self.check_git)
         layout.addWidget(git_btn)
+
+        restore_btn = QPushButton("Launch Restore Panel")
+        restore_btn.clicked.connect(self.open_restore_panel)
+        layout.addWidget(restore_btn)
 
     # -----------------------------------------------------------------------
     # Integrity Scan
@@ -157,3 +163,9 @@ class RecoveryDashboard(QWidget):
             self.output.append(f"❌ Could not read commit: {e}")
 
         self.output.append("\nGitHub sync check complete.\n")
+
+    def open_restore_panel(self):
+        """Open the IG Restore Panel from the Recovery Dashboard."""
+        self.restore_panel = RestorePanel(self)
+        self.restore_panel.show()
+        self.output.append("=== Opened IG Restore Panel ===\n")

@@ -18,3 +18,11 @@
 #      This file intentionally contains no executable code.
 #      Its presence enables proper package resolution.
 # ================================================================
+
+from .restore_panel import RestorePanel
+from .recovery_dashboard import RecoveryDashboard
+
+__all__ = [
+    "RestorePanel",
+    "RecoveryDashboard",
+]

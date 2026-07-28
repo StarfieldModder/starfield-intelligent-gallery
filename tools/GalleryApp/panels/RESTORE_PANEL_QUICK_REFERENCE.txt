@@ -1,0 +1,274 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                   IG RESTORE PANEL — QUICK REFERENCE                      ║
+║                                                                            ║
+║  Module: restore_panel.py                                                 ║
+║  Location: C:\IG\tools\GalleryApp\panels\                                  ║
+║  Date: July 26, 2026, 06:01 AM PDT                                        ║
+║  Author: Mark J. Latsha + Microsoft Copilot                               ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ FILE STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+C:\IG\tools\GalleryApp\panels\
+├── restore_panel.py (28.4 KB)                    ← MAIN MODULE
+├── RESTORE_PANEL_INTEGRATION.md (11.7 KB)       ← INTEGRATION GUIDE
+├── RESTORE_PANEL_EXAMPLE_INTEGRATION.py (13.8 KB) ← CODE EXAMPLES
+├── README_RESTORE_PANEL.md (13.8 KB)            ← FULL DOCUMENTATION
+└── RESTORE_PANEL_QUICK_REFERENCE.txt            ← THIS FILE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ CORE CLASSES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+RestorePanel(QWidget)
+  • Main UI panel with holographic design
+  • Backup source selector (SSD/HD)
+  • Progress bar, status label, output display
+  • Buttons: RESTORE, VERIFY, CANCEL
+
+RestoreWorker(QObject)
+  • Async restore orchestration in separate thread
+  • Workflow: pre-check → snapshot → verify → restore → integrity → notify
+  • Emits: progress_updated, status_changed, error_occurred, complete
+
+IntegrityChecker
+  • SHA256 hash computation for files
+  • Directory scanning and manifest management
+  • Verification against manifest
+  • Methods: compute_hash(), scan_directory(), verify()
+
+GitSnapshotManager
+  • Creates Git snapshots before restore
+  • Enables atomic rollback if needed
+  • Methods: create_snapshot(), get_latest_commit()
+
+GuardianAINotifier
+  • Sends notifications to Guardian AI companion
+  • Writes to C:\IG\logs\companion_notifications.log
+  • Methods: notify(), _generate_message()
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KEY ENUMS & CONSTANTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+RestoreSource (Enum)
+  • SSD = "C:/IG"
+  • HD = "D:/IG"
+
+RestoreStatus (Enum)
+  • IDLE, PRE_CHECK, SNAPSHOT, VERIFYING, RESTORING
+  • INTEGRITY_CHECK, NOTIFYING, COMPLETE, FAILED, ROLLED_BACK
+
+Backup Paths
+  • IG_ROOT = Path("C:/IG")          # Main IG directory
+  • BACKUP_SSD = Path("C:/IG")       # SSD backup (same as root)
+  • BACKUP_HD = Path("D:/IG")        # HD backup
+
+Preserved Patterns (not overwritten during restore)
+  • .venv                            # Python virtual environment
+  • __pycache__                      # Compiled Python cache
+  • .pytest_cache                    # Test cache
+  • *.log                            # Log files
+  • session-state                    # Active session state
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ QUICK START
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. STANDALONE EXECUTION
+   cd C:\IG\tools\GalleryApp\panels
+   python restore_panel.py
+
+2. INTEGRATION WITH RECOVERY DASHBOARD
+   from restore_panel import RestorePanel
+   
+   restore_panel = RestorePanel()
+   restore_panel.show()
+
+3. PROGRAMMATIC USE
+   from restore_panel import RestorePanel, RestoreSource
+   
+   panel = RestorePanel()
+   panel.source_combo.setCurrentIndex(0)  # SSD
+   panel.start_restore()
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ RESTORE WORKFLOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. User selects backup source (SSD or HD) in dropdown
+2. User clicks "RESTORE" button
+3. Confirmation dialog shown
+4. RestoreWorker thread starts (async)
+   └─ Pre-checks: verify source exists, Git repo initialized
+   └─ Create snapshot: Git commit for rollback point
+   └─ Verify backup: integrity check of source files
+   └─ Restore files: copy from backup to C:\IG (skip preserved patterns)
+   └─ Verify integrity: hash check of restored files
+   └─ Notify Guardian: write to companion_notifications.log
+5. Complete signal emitted with RestoreReport
+6. RestorePanel displays detailed report
+   └─ Status, files restored, errors, warnings, snapshot commit
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ RECOVERY DASHBOARD INTEGRATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Add to recovery_dashboard.py:
+
+  from restore_panel import RestorePanel
+  
+  # In __init__():
+  restore_btn = QPushButton("🔄 RESTORE GALLERY")
+  restore_btn.clicked.connect(self.open_restore_panel)
+  layout.addWidget(restore_btn)
+  
+  # Add method:
+  def open_restore_panel(self):
+      self.restore_panel = RestorePanel(self)
+      self.restore_panel.show()
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GUARDIAN AI INTEGRATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Restore Panel writes notifications to:
+  C:\IG\logs\companion_notifications.log
+
+Format:
+  [ISO_TIMESTAMP] RESTORE: Voice-friendly message here
+
+Add to companion/voice system to read and voice these notifications.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GIT INTEGRATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pre-restore snapshots enable safe rollback:
+
+  # View snapshots:
+  cd C:\IG
+  git log --oneline | grep "Pre-restore"
+
+  # Rollback if needed:
+  git reset --hard <snapshot-commit-hash>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ RESTORE REPORT DATA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+RestoreReport contains:
+  • status: RestoreStatus (COMPLETE, FAILED, ROLLED_BACK, etc.)
+  • source: RestoreSource (SSD or HD)
+  • timestamp: datetime of operation start
+  • files_restored: int count
+  • files_checked: int count
+  • integrity_passed: bool
+  • snapshot_commit: str (Git commit hash)
+  • guardian_notified: bool
+  • errors: List[str]
+  • warnings: List[str]
+  • rollback_executed: bool
+  • rollback_point: str (Git commit hash)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ERROR HANDLING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Source Not Found
+  → Verify backup path connected
+  → Check drive letter assignment
+  → Update BACKUP_SSD/BACKUP_HD if needed
+
+Backup Verification Failed
+  → Core modules missing or corrupted
+  → Restore cannot proceed safely
+  → Use Recovery Dashboard to verify backup
+
+Restore Stuck
+  → Click Cancel button to abort
+  → Restore will rollback to pre-restore snapshot
+  → Check Windows Task Manager if unresponsive
+
+Guardian AI Notification Failed
+  → Check C:\IG\logs\ directory exists
+  → Error won't block restore operation
+  → Files already copied will remain
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ DEPENDENCIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Required:
+  • Python ≥ 3.10
+  • PySide6 (for GUI)
+  • Git (for snapshots)
+
+Optional:
+  • Guardian AI companion system (for voice notifications)
+
+Install:
+  pip install PySide6
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ HOLOGRAPHIC COLOR PALETTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOLO_BG         = "#0A0E1A"      Deep space background
+HOLO_PANEL      = "#0D1526"      Panel background
+HOLO_ACCENT     = "#00B4FF"      Cyan accent (primary)
+HOLO_SUCCESS    = "#00FF9C"      Green (success)
+HOLO_WARNING    = "#FFB300"      Amber (warning)
+HOLO_ERROR      = "#FF4444"      Red (error)
+HOLO_TEXT       = "#C8D8E8"      Light text
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ DOCUMENTATION FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+README_RESTORE_PANEL.md
+  └─ Complete implementation overview
+  └─ Architecture, features, quick start
+  └─ File listings and examples
+
+RESTORE_PANEL_INTEGRATION.md
+  └─ Detailed integration guide
+  └─ Recovery Dashboard integration
+  └─ Guardian AI integration
+  └─ Git workflow
+  └─ Troubleshooting
+
+RESTORE_PANEL_EXAMPLE_INTEGRATION.py
+  └─ 7 practical code examples
+  └─ Standalone, dashboard, report handling
+  └─ Guardian AI, workflows, error handling
+  └─ Performance monitoring
+
+RESTORE_PANEL_QUICK_REFERENCE.txt
+  └─ This file
+  └─ Quick lookup reference
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SUPPORT & RESOURCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Issues? Check:
+  1. C:\IG\logs\* for error details
+  2. Recovery Dashboard integrity scan
+  3. Git log in C:\IG for commit history
+  4. companion_notifications.log for Guardian alerts
+
+Questions? See:
+  1. README_RESTORE_PANEL.md (overview)
+  2. RESTORE_PANEL_INTEGRATION.md (detailed guide)
+  3. RESTORE_PANEL_EXAMPLE_INTEGRATION.py (code examples)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Status: ✅ COMPLETE AND READY FOR INTEGRATION
+Last Updated: July 26, 2026, 06:01 AM PDT
+Maintainer: Mark J. Latsha + Copilot AI
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
