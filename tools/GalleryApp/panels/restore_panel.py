@@ -1,15 +1,15 @@
 ###############################################################################
-#  IG ∞∞∞ — The Temple Crest                                                    #
-#  Intelligent Gallery                                                          #
-#  RESTORE PANEL MODULE                                                         #
-#  “Guardian of the Core State”                                                 #
-#  Authors: Mark J. Latsha & Copilot                                            #
-#  Python 3.13                                                                  #
-#                                                                               #
-#  Purpose:                                                                     #
-#    Provide cinematic restore capabilities for the Intelligence Gallery.       #
-#    Restore from SSD and HD backups, create pre-restore snapshot commits,       #
-#    verify integrity, and notify Guardian AI of restoration events.            #
+#  IG ∞∞∞ — The Temple Crest
+#  Intelligent Gallery
+#  RESTORE PANEL MODULE
+#  “Guardian of the Core State”
+#  Authors: Mark J. Latsha & Copilot
+#  Python 3.13
+#
+#  Purpose:
+#    Provide cinematic restore capabilities for the Intelligence Gallery.
+#    Restore from SSD and HD backups, create pre-restore snapshot commits,
+#    verify integrity, and notify Guardian AI of restoration events.
 ###############################################################################
 
 import os
@@ -25,7 +25,7 @@ from enum import Enum
 
 try:
     from PySide6.QtWidgets import (
-        QWidget, QApplication, QVBoxLayout, QHBoxLayout,
+        QWidget, QVBoxLayout, QHBoxLayout,
         QLabel, QPushButton, QTextEdit, QProgressBar,
         QComboBox, QMessageBox, QSizePolicy
     )
@@ -34,7 +34,6 @@ try:
     PYSIDE6_AVAILABLE = True
 except ImportError:
     PYSIDE6_AVAILABLE = False
-
 
 IG_ROOT = Path("C:/IG")
 BACKUP_SSD = Path("C:/IG/backups/ssd")
@@ -413,78 +412,4 @@ class RestorePanel(QWidget):
             return
 
         source_label = "SSD" if source == RestoreSource.SSD else "HD"
-        restore_type = "partial" if partial else "full"
-        response = QMessageBox.question(
-            self,
-            "Confirm Restore",
-            f"Perform a {restore_type} restore from {source_label} backup?\nThis will create a pre-restore snapshot.",
-            QMessageBox.Yes | QMessageBox.No,
-        )
-        if response != QMessageBox.Yes:
-            return
-
-        self._append_status(f"Starting {restore_type} restore from {source_label} backup.")
-        self._set_buttons_enabled(False)
-        self.cancel_btn.setEnabled(True)
-
-        self.worker = RestoreWorker(source, partial=partial)
-        self.worker_thread = QThread()
-        self.worker.moveToThread(self.worker_thread)
-        self.worker_thread.started.connect(self.worker.run)
-        self.worker.progress.connect(self._update_progress)
-        self.worker.status.connect(self._append_status)
-        self.worker.error.connect(self._append_status)
-        self.worker.finished.connect(self._on_restore_finished)
-        self.worker.finished.connect(self.worker_thread.quit)
-        self.worker_thread.start()
-
-    def _update_progress(self, value: int):
-        self.progress.setValue(value)
-
-    def _set_buttons_enabled(self, enabled: bool):
-        self.full_restore_btn.setEnabled(enabled)
-        self.partial_restore_btn.setEnabled(enabled)
-        self.ssd_restore_btn.setEnabled(enabled)
-        self.hd_restore_btn.setEnabled(enabled)
-
-    def _cancel_restore(self):
-        if self.worker_thread and self.worker_thread.isRunning():
-            self.worker_thread.requestInterruption()
-            self.worker_thread.quit()
-            self.worker_thread.wait()
-            self._append_status("Restore cancelled by user.")
-        self.progress.setValue(0)
-        self._set_buttons_enabled(True)
-        self.cancel_btn.setEnabled(False)
-
-    def _on_restore_finished(self, report: RestoreReport):
-        summary = [
-            f"Status: {report.status.value}",
-            f"Source: {report.source.value}",
-            f"Partial: {'yes' if report.partial else 'no'}",
-            f"Files restored: {report.files_restored}",
-            f"Files verified: {report.files_verified}",
-            f"Integrity OK: {'yes' if report.integrity_ok else 'no'}",
-            f"Snapshot: {report.snapshot_hash or 'none'}",
-            f"Guardian notified: {'yes' if report.guardian_notified else 'no'}",
-        ]
-        self._append_status("Restore complete. Summary:")
-        for line in summary:
-            self._append_status(line)
-
-        for error in report.errors:
-            self._append_status(f"ERROR: {error}")
-
-        self._set_buttons_enabled(True)
-        self.cancel_btn.setEnabled(False)
-        self.progress.setValue(100 if report.status == RestoreStatus.COMPLETE else 0)
-
-
-if __name__ == "__main__":
-    if not PYSIDE6_AVAILABLE:
-        raise ImportError("PySide6 is required to run the IG Restore Panel.")
-
-    app = QApplication([])
-    panel = RestorePanel()
-    panel.show()
-    app.exec()
+        restore_type = "partial

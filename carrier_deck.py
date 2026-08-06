@@ -24,11 +24,18 @@ r"""
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
+
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 from PySide6.QtCore import Qt
 
+
 class CarrierDeck(QWidget):
-    def __init__(self, debug=False, on_choice=None):
+    """
+    The SIG Carrier Deck — the interactive navigation surface
+    that appears after The Crossing and before the Cosmic Choice Panel.
+    """
+
+    def __init__(self, debug: bool = False, on_choice=None):
         super().__init__()
         self.debug = debug
         self._on_choice = on_choice
@@ -36,9 +43,12 @@ class CarrierDeck(QWidget):
         self.setWindowTitle("SIG — Carrier Deck")
         self.setStyleSheet("background-color: #050810; color: white;")
 
-        layout = QVBoxLayout(self)
+        # Editor-friendly layout creation
+        layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignCenter)
+        self.setLayout(layout)
 
+        # Title
         title = QLabel("CARRIER DECK — PANELS ONLINE")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
@@ -50,6 +60,23 @@ class CarrierDeck(QWidget):
         layout.addWidget(btn)
 
     def run(self):
+        """Show the Carrier Deck in full-screen mode."""
         self.showFullScreen()
 
 
+# ------------------------------------------------------------
+# SAFE STANDALONE RUNNER
+# ------------------------------------------------------------
+if __name__ == "__main__":
+    from PySide6.QtWidgets import QApplication
+    import sys
+
+    app = QApplication(sys.argv)
+
+    def _dummy_choice():
+        print("Cosmic Choice Panel would launch here.")
+
+    deck = CarrierDeck(on_choice=_dummy_choice)
+    deck.run()
+
+    sys.exit(app.exec())

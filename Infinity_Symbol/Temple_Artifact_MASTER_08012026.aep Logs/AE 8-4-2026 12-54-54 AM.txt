@@ -1,0 +1,22 @@
+Adobe After Effects v26.3 Windows 64 render log for project “Temple_Artifact_MASTER_08012026.aep”
+
+Rendering started on 8/4/2026 at 12:54:54 AM
+
+  8/4/2026 12:54:54 AM: Starting composition “SIG_unity_metallic”.
+
+  Output To: C:\Users\latsh\Videos\Temple_Artifact_RENDERS\IG_unity_metallic.mp4    8/4/2026 12:55:59 AM: Finished composition “SIG_unity_metallic”.
+
+
+  8/4/2026 12:55:59 AM: Starting composition “SIG_unity_metallic”.
+
+  Output To: C:\Users\latsh\Videos\Temple_Artifact_RENDERS\IG_unity_metallic_1_[#####].png    8/4/2026 12:59:25 AM: Finished composition “SIG_unity_metallic”.
+
+
+  8/4/2026 12:59:25 AM: Starting composition “Temple_Artifact_MASTER”.
+
+  Output To: C:\Users\latsh\Videos\Temple_Artifact_RENDERS\Temple_Artifact_MASTER.mp4    8/4/2026 1:00:29 AM: Finished composition “Temple_Artifact_MASTER”.
+
+
+  Total Time Elapsed: 5 Min, 34 Sec
+Log closed on 8/4/2026 at 1:00:29 AM
+

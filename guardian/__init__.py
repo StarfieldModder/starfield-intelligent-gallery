@@ -1,46 +1,26 @@
-###############################################################################
-#  INTELLIGENT GALLERY — GUARDIAN PACKAGE INITIALIZER
-#  Module: guardian/__init__.py
-#
-#  Project: Starfield Intelligent Gallery (SIG)
-#  Purpose:
-#      Marks the guardian directory as a Python package and exports
-#      the GuardianAI module for system-wide access.
-#
-#  Author: Mark J. Latsha (Games)
-#  Co‑Author: Microsoft Copilot (AI Development Assistant)
-#
-#  Version: 1.0
-#  Created: July 2026
-#
-#  Notes:
-#      The Guardian AI provides 24/7 monitoring, anomaly detection,
-#      predictive analysis, and artifact protection for the IG.
-###############################################################################
+# guardian/__init__.py
+import importlib, logging
+logger = logging.getLogger(__name__)
 
-from .guardian_ai import (
-    GuardianAI,
-    GuardianMonitor,
-    AnomalyDetector,
-    PredictiveAnalyzer,
-    AnomalyReport,
-    AnomalyType,
-    IntegritySnapshot,
-    HealthStatus,
-    
-)
-
-self.memory_core = MemoryCore()
-self.memory_core.record_event("guardian_event", event, {"source": "GuardianAI"})
-
-
-__all__ = [
-    "GuardianAI",
-    "GuardianMonitor",
-    "AnomalyDetector",
-    "PredictiveAnalyzer",
-    "AnomalyReport",
-    "AnomalyType",
-    "IntegritySnapshot",
-    "HealthStatus",
+_expected = [
+    "GuardianAI","GuardianMonitor","AnomalyDetector","PredictiveAnalyzer",
+    "AnomalyReport","AnomalyType","IntegritySnapshot","GuardianBridge",
+    "GuardianPulse","GuardianVoice","GuardianSeverity",
 ]
+
+try:
+    _mod = importlib.import_module(".guardian_ai", package=__package__)
+except Exception:
+    logger.exception("Failed to import guardian.guardian_ai")
+    raise
+
+__all__ = []
+for name in _expected:
+    if hasattr(_mod, name):
+        globals()[name] = getattr(_mod, name)
+        __all__.append(name)
+    else:
+        logger.warning("guardian.guardian_ai missing expected symbol: %s", name)
+
+guardian_ai = _mod
+

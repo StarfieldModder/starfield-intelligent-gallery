@@ -1,27 +1,0 @@
-Adobe After Effects v26.3 Windows 64 render log for project “Temple_v02.aep”
-
-Rendering started on 7/17/2026 at 10:33:54 PM
-
-  7/17/2026 10:33:54 PM: Starting composition “SIG_unity_metallic_MASTER”.
-
-  Output To: C:\SIG\Logos\SIG_unity_metallic_MASTER_1.mp4    7/17/2026 10:34:30 PM: Finished composition “SIG_unity_metallic_MASTER”.
-
-
-  7/17/2026 10:34:31 PM: Starting composition “SIG_unity_metallic_MASTER”.
-
-  Output To: C:\SIG\Logos\SIG_unity_metallic_MASTER_2.mp4    7/17/2026 10:35:18 PM: Finished composition “SIG_unity_metallic_MASTER”.
-
-
-  7/17/2026 10:35:20 PM: Starting composition “SIG_unity_metallic_MASTER”.
-
-  Output To: C:\SIG\Logos\SIG_unity_metallic_MASTER_3.mp4    7/17/2026 10:36:06 PM: Finished composition “SIG_unity_metallic_MASTER”.
-
-
-  7/17/2026 10:36:08 PM: Starting composition “SIG_unity_metallic_MASTER”.
-
-  Output To: C:\SIG\Logos\SIG_unity_metallic_MASTER_4.mp4    7/17/2026 10:36:50 PM: Finished composition “SIG_unity_metallic_MASTER”.
-
-
-  Total Time Elapsed: 2 Min, 54 Sec
-Log closed on 7/17/2026 at 10:36:50 PM
-
